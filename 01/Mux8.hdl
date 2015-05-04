@@ -1,0 +1,47 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux.hdl
+
+/** 
+ * Multiplexor:
+ * out = a if sel == 000
+ *       b if sel == 001
+ *	 c if sel == 010
+ *       d if sel == 011
+ *	 e if sel == 100
+ *	 f if sel == 101
+ *	 g if sel == 110
+ *	 h if sel == 111
+ */
+
+CHIP Mux8 {
+    IN a, b, c, d, e, f, g, h, sel[3];
+    OUT out;
+
+    PARTS:
+    // Put your code here:
+    Not(in=sel[0], out=nsel0);
+    Not(in=sel[1], out=nsel1);
+    Not(in=sel[2], out=nsel2);
+
+    And3(a=nsel0, b=nsel1, c=nsel2, out=oa);
+    And3(a=sel[0], b=nsel1, c=nsel2, out=ob);
+    And3(a=nsel0, b=sel[1], c=nsel2, out=oc);
+    And3(a=sel[0], b=sel[1], c=nsel2, out=od);
+    And3(a=nsel0, b=nsel1, c=sel[2], out=oe);
+    And3(a=sel[0], b=nsel1, c=sel[2], out=of);
+    And3(a=nsel0, b=sel[1], c=sel[2], out=og);
+    And3(a=sel[0], b=sel[1], c=sel[2], out=oh);
+
+    And(a=a, b=oa, out=res1);
+    And(a=b, b=ob, out=res2);
+    And(a=c, b=oc, out=res3);
+    And(a=d, b=od, out=res4);
+    And(a=e, b=oe, out=res5);
+    And(a=f, b=of, out=res6);
+    And(a=g, b=og, out=res7);
+    And(a=h, b=oh, out=res8);
+
+    Or8Way(in[0]=res1, in[1]=res2, in[2]=res3, in[3]=res4, in[4]=res5, in[5]=res6,in[6]=res7,in[7]=res8, out=out);
+}
