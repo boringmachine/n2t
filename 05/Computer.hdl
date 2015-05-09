@@ -20,4 +20,7 @@ CHIP Computer {
 
     PARTS:
     // Put your code here:
+     ROM32K(address=pc, out=in1);
+     CPU(inM=in2, instruction=in1, reset=reset, writeM=w, outM=o, addressM=a, pc=pc);
+     Memory(in=o, address=a, load=w, out=in2);
 }
