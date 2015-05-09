@@ -92,4 +92,5 @@ CHIP CPU {
 
     And(a=i, b=d3, out=writeM);
     PC(in=aout, reset=reset, inc=inc, load=ji, out[0..14]=pc);
+
 }
