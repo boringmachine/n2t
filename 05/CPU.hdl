@@ -40,4 +40,56 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+    
+    And(a=instruction[15], b=true, out=i);
+    And(a=instruction[12], b=true, out=a);
+    And(a=instruction[11], b=true, out=c1);
+    And(a=instruction[10], b=true, out=c2);
+    And(a=instruction[9], b=true, out=c3);
+    And(a=instruction[8], b=true, out=c4);
+    And(a=instruction[7], b=true, out=c5);
+    And(a=instruction[6], b=true, out=c6);
+    And(a=instruction[5], b=true, out=d1);
+    And(a=instruction[4], b=true, out=d2);
+    And(a=instruction[3], b=true, out=d3);
+    And(a=instruction[2], b=true, out=j1);
+    And(a=instruction[1], b=true, out=j2);
+    And(a=instruction[0], b=true, out=j3);
+    
+    Not(in=i, out=ni);
+    Or(a=ni, b=d3, out=d3i);
+
+    Mux16(a=calc, b=instruction, sel=d3i, out=o1);
+    And16(a[15]=false, a[0..14]=true,b=o1, out=o1msk);
+
+    Or(a=ni, b=d1, out=d1i);
+    And(a=i, b=d2, out=d2i);
+
+    ARegister(in=o1msk, load=d1i, out=aout, out[0..14]=addressM);
+
+    Mux16(a=aout, b=inM, sel=a, out=aorm);
+
+    ALU(x=dout, y=aorm, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, out=outM, out=calc, zr=zr, ng=ng);
+
+    DRegister(in=calc, load=d2i, out=dout);
+
+    DMux4Way(in=i, sel[0]=zr, sel[1]=ng, a=jgt, b=jeq, c=jlt, d=jle);
+
+    And(a=j1, b=ng, out=cmp1);
+    And(a=j2, b=jeq, out=cmp2);
+    And(a=j3, b=jgt, out=cmp3);
+    Or(a=cmp1, b=cmp2, out=cmp4);
+    Or(a=cmp3, b=cmp4, out=cmp5);
+
+    And(a=j1,b=j2,out=cmp6);
+    And(a=cmp6,b=j3,out=cmp7);
+
+    Or(a=cmp5, b=cmp7, out=j);
+
+    And(a=i, b=j, out=ji);
+
+    Not(in=ji, out=inc);
+
+    And(a=i, b=d3, out=writeM);
+    PC(in=aout, reset=reset, inc=inc, load=ji, out[0..14]=pc);
 }
