@@ -41,46 +41,42 @@ CHIP CPU {
     PARTS:
     // Put your code here:
 
+    // Decode Section
     And16(a=instruction, b=true, 
 	out[15]=i, out[12]=a, 
 	out[11]=c1, out[10]=c2, out[9]=c3, out[8]=c4, out[7]=c5, out[6]=c6,
 	out[5]=d1, out[4]=d2, out[3]=d3, 
-	out[2]=j1, out[1]=j2, out[0]=j3);    
-
-    Not(in=i, out=ni);
-    Or(a=ni, b=d3, out=d3i);
-
-    Mux16(a=calc, b=instruction, sel=d3i, out=o1);
-    And16(a[15]=false, a[0..14]=true,b=o1, out=o1msk);
-
-    Or(a=ni, b=d1, out=d1i);
-    And(a=i, b=d2, out=d2i);
-
-    ARegister(in=o1msk, load=d1i, out=aout, out[0..14]=addressM);
-
-    Mux16(a=aout, b=inM, sel=a, out=aorm);
-
-    ALU(x=dout, y=aorm, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, out=outM, out=calc, zr=zr, ng=ng);
-
-    DRegister(in=calc, load=d2i, out=dout);
-
+	out[2]=j1, out[1]=j2, out[0]=j3);
     DMux4Way(in=i, sel[0]=zr, sel[1]=ng, a=jgt, b=jeq, c=jlt, d=jle);
-
     And(a=j1, b=jlt, out=cmp1);
     And(a=j2, b=jeq, out=cmp2);
     And(a=j3, b=jgt, out=cmp3);
     Or(a=cmp1, b=cmp2, out=cmp4);
     Or(a=cmp3, b=cmp4, out=cmp5);
-
     And(a=j1,b=j2,out=cmp6);
     And(a=cmp6,b=j3,out=cmp7);
-
     Or(a=cmp5, b=cmp7, out=j);
-
     And(a=i, b=j, out=ji);
     Not(in=ji, out=inc);
+    Not(in=i, out=ni);
+    Or(a=ni, b=d1, out=d1i);
+    And(a=i, b=d2, out=d2i);
+    Or(a=ni, b=d3, out=d3i);
 
-    And(a=i, b=d3, out=writeM);
+    // Register
+    ARegister(in=o1msk, load=d1i, out=aout, out[0..14]=addressM);
+    DRegister(in=calc, load=d2i, out=dout);
     PC(in=aout, reset=reset, inc=inc, load=ji, out[0..14]=pc);
+
+    // 
+    Mux16(a=calc, b=instruction, sel=d3i, out=o1);
+    And16(a[15]=false, a[0..14]=true,b=o1, out=o1msk);
+    Mux16(a=aout, b=inM, sel=a, out=aorm);
+
+    //
+    And(a=i, b=d3, out=writeM);
+    ALU(x=dout, y=aorm, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, out=outM, out=calc, zr=zr, ng=ng);
+
+
 
 }
