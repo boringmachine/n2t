@@ -29,8 +29,7 @@ public class Parser {
 		reader = new InputStreamReader(in);
 		char[] data = new char[(int) file.length()];
 		reader.read(data);
-		this.data = new String(data);
-		this.data = this.data.replaceAll(" ", "").replaceAll("//.*\n?", "");
+		this.data = (new String(data)).replaceAll(" ", "").replaceAll("//.*\n?", "");
 		reader = new InputStreamReader(new ByteArrayInputStream(this.data.getBytes("UTF-8")));
 		scan = new Scanner(this.data).useDelimiter("\\p{Space}+");
 	}
