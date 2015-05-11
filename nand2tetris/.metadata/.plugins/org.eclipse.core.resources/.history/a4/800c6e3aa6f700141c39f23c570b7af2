@@ -1,0 +1,64 @@
+package Assembler;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+
+public class Parser {
+
+	File file;
+	FileInputStream in;
+	InputStreamReader reader;
+	String command;
+	String symbol;
+	
+	
+	final int A_COMMAND = 0x1;
+	final int C_COMMAND = 0x2;
+	final int L_COMMAND = 0x4;
+	
+	Scanner scan;
+	
+	Parser(String filename) throws FileNotFoundException{
+		this.file = new File(filename);
+		in = new FileInputStream(file);
+		reader = new InputStreamReader(in);
+		scan = new Scanner(in).useDelimiter("\\s*//*\n");
+	}
+	
+	boolean hasMoreCommands() throws IOException{
+		return reader.ready();
+	}
+	
+	void advance(){
+		scan.next();
+	}
+	
+	
+	int commandType(){
+		return 1;
+	}
+	
+	String symbol() {
+		return "a";
+	}
+	
+	String dest () {
+		return "";
+	}
+	
+	String jump () {
+		return "";
+	}
+	
+	
+	public static void main(String args[]) throws FileNotFoundException{
+		Parser a = new Parser("Add.asm");
+		System.out.println(a.scan.next());
+	}
+
+	
+}

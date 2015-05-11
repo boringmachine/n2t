@@ -1,0 +1,80 @@
+package Assembler;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+
+public class Parser {
+
+	File file;
+	FileInputStream in;
+	InputStreamReader reader;
+	String command;
+	String symbol;
+	String data;
+	StringBuilder parsed;
+	
+	
+	final int A_COMMAND = 0x1;
+	final int C_COMMAND = 0x2;
+	final int L_COMMAND = 0x4;
+	
+	Scanner scan;
+	
+	Parser(String filename) throws IOException{
+		this.file = new File(filename);
+		in = new FileInputStream(file);
+		reader = new InputStreamReader(in);
+		char[] data = new char[(int) file.length()];
+		reader.read(data);
+		String str = new String(data);
+		str = str.replaceAll(" ", "").replaceAll("//.*\r\n?\r?\n?", "");
+		reader = new InputStreamReader(new ByteArrayInputStream(str.getBytes("UTF-8")));
+		scan = new Scanner(str);
+	}
+	
+	boolean hasMoreCommands() throws IOException{
+		return reader.ready();
+	}
+	
+	void advance() throws IOException{
+		command = scan.next();
+		if(commandType() == A_COMMAND){
+			parsed.append(command.replaceFirst("@", ""));
+		}
+	}
+	
+	
+	int commandType(){
+		if(command.startsWith("@")) return A_COMMAND ;
+		else if(command.startsWith("(")) return L_COMMAND;
+		else return C_COMMAND;
+	}
+	
+	String symbol() {
+		return "a";
+	}
+	
+	String dest () {
+		return "";
+	}
+	
+	String jump () {
+		return "";
+	}
+	
+	
+	public static void main(String args[]) throws IOException{
+		Parser a = new Parser("Add.asm");
+		a.advance();
+		System.out.println(a.command);
+
+	}
+
+	
+}
