@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Parser {
@@ -35,11 +36,13 @@ public class Parser {
 	}
 	
 	boolean hasMoreCommands() throws IOException{
-		return reader.ready();
+		return scan.hasNext(".+");
 	}
 	
-	void advance() throws IOException{
-		command = scan.next();
+	void advance() throws IOException {
+		try{
+			command = scan.next();
+		}catch(NoSuchElementException e){}
 	}
 	
 	
@@ -85,10 +88,10 @@ public class Parser {
 	
 //TODO check the output
 	public static void main(String args[]) throws IOException{
-		Parser a = new Parser("PongL.asm");
+		Parser a = new Parser("Max.asm");
 		System.out.println(a.data);
 		while(a.hasMoreCommands()){
-			a.advance();
+		    a.advance();
 			System.out.println("TYPE  :" + a.commandType());
 			System.out.println("CMD   :" + a.command);
 			System.out.println("SYMBOL:" + a.symbol());

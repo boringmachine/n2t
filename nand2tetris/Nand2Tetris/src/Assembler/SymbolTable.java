@@ -23,7 +23,7 @@ public class SymbolTable extends LinkedHashMap<String, Integer> {
 	}
 	
 	void addEntry(String symbol, Integer address){
-		if(contains(symbol)){
+		if(!contains(symbol)){
 			put(symbol, address);
 		}
 	}

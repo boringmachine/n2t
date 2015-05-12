@@ -1,0 +1,16 @@
+package Assembler;
+
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+
+public class Assembler {
+
+	String filename;
+	FileOutputStream out;
+	FileWriter writer;
+	Parser parser;
+	
+	Assembler(){
+		
+	}
+}

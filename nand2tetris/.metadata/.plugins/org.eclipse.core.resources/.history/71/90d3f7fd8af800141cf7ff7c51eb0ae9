@@ -1,0 +1,8 @@
+package Assembler;
+
+public class Assembler {
+
+	String filename;
+	FileOutputStream out;
+	FileOutputWriter writer;
+}

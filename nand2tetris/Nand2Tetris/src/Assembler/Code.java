@@ -34,7 +34,7 @@ public class Code {
 		else if(str.equals("D-1")) c |= 0x0E;
 		else if(str.equals("A-1")) c |= 0x32;
 		else if(str.equals("D+A")) c |= 0x02;
-		else if(str.equals("D-A")) c |= 0x1;
+		else if(str.equals("D-A")) c |= 0x13;
 		else if(str.equals("A-D")) c |= 0x07;
 		else if(str.equals("D&A")) c |= 0x0;
 		else if(str.equals("D|A")) c |= 0x15;
@@ -54,17 +54,5 @@ public class Code {
 		return j;
 	}
 	
-	static byte[] cCommand(String dest, String comp, String jump){
-		byte[] bytes = ByteBuffer.allocate(4).putInt(0xE000 | dest(dest) | comp(comp) | jump(jump)).array();
-		byte[] code = {bytes[2], bytes[3]};
-		return code;
-	}
-	
-	public static void main(String args[]){
-		byte[] bytes = cCommand("D","A","");
 
-		for (byte b : bytes) {
-			System.out.format("0x%x ", b);
-		}		
-	}
 }
