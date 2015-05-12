@@ -61,7 +61,7 @@ public class Code {
 	}
 	
 	public static void main(String args[]){
-		byte[] bytes = cCommand("D","A","");
+		byte[] bytes = cCommand("D","D+M","JEQ");
 
 		for (byte b : bytes) {
 			System.out.format("0x%x ", b);
