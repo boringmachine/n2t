@@ -91,7 +91,7 @@ public class Assembler {
 	}
 	
 	public static void main(String argv[]) throws IOException{
-		Assembler asm = new Assembler("Max.asm", "aaa.hack");
+		Assembler asm = new Assembler("PongL.asm", "test.hack");
 		asm.createSymbolTable();
 		asm.writeCode();
 
