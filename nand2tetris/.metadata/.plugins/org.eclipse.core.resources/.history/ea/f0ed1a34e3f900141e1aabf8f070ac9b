@@ -52,15 +52,14 @@ public class Assembler {
 			parser.advance();
 			if(parser.symbol().matches("\\d+(\\.\\d+)?")){
 				address = Integer.parseInt(parser.symbol());
-				counter++;
 			} else if(parser.commandType() == Parser.L_COMMAND){
 				address = counter;
-			} else{
-				if(!table.contains(parser.symbol())) address = finalAddress++;
-				counter++;
 			}
-			if(!table.contains(parser.symbol()) || parser.commandType()==Parser.L_COMMAND)
-				table.addEntry(parser.symbol(), address);
+			else{
+				if(!table.contains(parser.symbol())) address = finalAddress++;
+			}
+			table.addEntry(parser.symbol(), address);
+			counter++;
 		}
 	}
 	

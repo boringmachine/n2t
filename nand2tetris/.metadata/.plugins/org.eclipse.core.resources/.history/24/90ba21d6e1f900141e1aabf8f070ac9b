@@ -20,7 +20,6 @@ public class Assembler {
 	ByteBuffer data;
 	int index = 0;
 	String infile;
-	int counter = 0;
 	
 	Assembler(String infile, String outfile) throws IOException{
 		this.infile = infile;
@@ -44,7 +43,6 @@ public class Assembler {
 		return code;
 	}
 	
-	
 	void createSymbolTable() throws IOException{
 		parser = new Parser(infile);
 		while(parser.hasMoreCommands()){
@@ -52,15 +50,10 @@ public class Assembler {
 			parser.advance();
 			if(parser.symbol().matches("\\d+(\\.\\d+)?")){
 				address = Integer.parseInt(parser.symbol());
-				counter++;
-			} else if(parser.commandType() == Parser.L_COMMAND){
-				address = counter;
-			} else{
+			} else {
 				if(!table.contains(parser.symbol())) address = finalAddress++;
-				counter++;
 			}
-			if(!table.contains(parser.symbol()) || parser.commandType()==Parser.L_COMMAND)
-				table.addEntry(parser.symbol(), address);
+			table.addEntry(parser.symbol(), address);
 		}
 	}
 	

@@ -59,8 +59,7 @@ public class Assembler {
 				if(!table.contains(parser.symbol())) address = finalAddress++;
 				counter++;
 			}
-			if(!table.contains(parser.symbol()) || parser.commandType()==Parser.L_COMMAND)
-				table.addEntry(parser.symbol(), address);
+			table.addEntry(parser.symbol(), address);
 		}
 	}
 	
