@@ -91,7 +91,7 @@ public class Assembler {
 	}
 	
 	public static void main(String argv[]) throws IOException{
-		Assembler asm = new Assembler("PongL.asm", "test.hack");
+		Assembler asm = new Assembler(argv[0], "tmp.bin");
 		asm.createSymbolTable();
 		asm.writeCode();
 

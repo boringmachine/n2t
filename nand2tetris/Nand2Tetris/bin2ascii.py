@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys, binascii
-infile = "test.hack"
-outfile = "test1.hack"
+infile = "tmp.bin"
+outfile = sys.argv[1]
 
 f = open(infile,"r")
 g = open(outfile,"w+")
