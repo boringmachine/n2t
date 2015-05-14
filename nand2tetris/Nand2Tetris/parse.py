@@ -14,6 +14,8 @@ def split_str(s, n):
 
 parsed = bin(int(code2, 16))[2:].zfill(16)
 parsed2 = split_str(parsed, 16)
+firstcode = code2[0:4]
+if(firstcode == "0000"): g.write("0000000000000000\n")
 for p in parsed2:
     g.write(p+"\n")
     
