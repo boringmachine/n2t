@@ -1,0 +1,18 @@
+package VMtranslator;
+
+import java.io.IOException;
+
+public class VMtranslator {
+
+	//debug
+	public static void main(String args[]) throws IOException{
+		Parser parser = new Parser("SimpleAdd.vm");
+		CodeWriter writer = new CodeWriter("SimpleAdd.asm");
+		while(parser.hasMoreCommands()){
+		    parser.advance();
+		    
+		    
+		}
+	}	
+	
+}
