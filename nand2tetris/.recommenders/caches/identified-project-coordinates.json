@@ -1,1 +1,1 @@
-[[{"location":"/usr/lib/jvm/java-6-openjdk-i386","type":"JRE","hints":{"EXECUTION_ENVIRONMENT":"JavaSE-1.6"}},"jre:jre:1.6.0"]]
+[[{"location":"/usr/lib/jvm/java-6-openjdk-i386","type":"JRE","hints":{"EXECUTION_ENVIRONMENT":"JavaSE-1.6"}},"jre:jre:1.6.0"],[{"location":"/home/shun/nand2tetris/projects/nand2tetris/Nand2Tetris","type":"PROJECT","hints":{"PROJECT_NAME":"Nand2Tetris"}},"ABSENT"]]

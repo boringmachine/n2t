@@ -14,6 +14,7 @@ public class CodeWriter {
 	OutputStreamWriter writer;
 	StringBuilder data;
 	String outfile;
+	int labelCounter;
 	
 	CodeWriter(String outfile) throws IOException{
 		this.outfile = outfile;
@@ -21,6 +22,7 @@ public class CodeWriter {
 		out = new FileOutputStream(file);
 		writer = new OutputStreamWriter(out);
 		data = new StringBuilder();
+		int labelCounter = 0;
 	}
 	
 	void setFileName(String fileName) throws IOException{
@@ -44,21 +46,44 @@ public class CodeWriter {
 		}else if(command.equals("eq")){
 			writer.write("@SP\n"+"AM=M-1\n"+"A=M\n");
 			writer.write("D=A-D\n");
-			writer.write("D=-1;JNE\n");
+			writer.write("@TRUE"+labelCounter+"\n");
+			writer.write("D;JEQ\n");
+			writer.write("D=0\n");
+			writer.write("@FALSE"+labelCounter+"\n");
+			writer.write("0;JMP\n");
+			writer.write("("+"TRUE"+labelCounter+")\n");
+			writer.write("D=-1\n");
+			writer.write("("+"FALSE"+(labelCounter++)+")\n");
+			
 		}else if(command.equals("gt")){
 			writer.write("@SP\n"+"AM=M-1\n"+"A=M\n");
 			writer.write("D=A-D\n");
-			writer.write("D=-1;JLE\n");
+			writer.write("@TRUE"+labelCounter+"\n");
+			writer.write("D;JGT\n");
+			writer.write("D=0\n");
+			writer.write("@FALSE"+labelCounter+"\n");
+			writer.write("0;JMP\n");
+			writer.write("("+"TRUE"+labelCounter+")\n");
+			writer.write("D=-1\n");
+			writer.write("("+"FALSE"+(labelCounter++)+")\n");
+
 		}else if(command.equals("lt")){
 			writer.write("@SP\n"+"AM=M-1\n"+"A=M\n");
 			writer.write("D=A-D\n");
-			writer.write("D=-1;JGE\n");
+			writer.write("@TRUE"+labelCounter+"\n");
+			writer.write("D;JLT\n");
+			writer.write("D=0\n");
+			writer.write("@FALSE"+labelCounter+"\n");
+			writer.write("0;JMP\n");
+			writer.write("("+"TRUE"+labelCounter+")\n");
+			writer.write("D=-1\n");
+			writer.write("("+"FALSE"+(labelCounter++)+")\n");
 		}else if(command.equals("and")){
 			writer.write("@SP\n"+"AM=M-1\n"+"A=M\n");
-			writer.write("D=A&D");
+			writer.write("D=A&D\n");
 		}else if(command.equals("or")){
 			writer.write("@SP\n"+"AM=M-1\n"+"A=M\n");
-			writer.write("D=A|D");
+			writer.write("D=A|D\n");
 		}else if(command.equals("not")){
 			writer.write("D=!D\n");
 		}else{

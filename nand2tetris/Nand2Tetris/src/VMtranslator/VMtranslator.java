@@ -6,8 +6,8 @@ public class VMtranslator {
 
 	//debug
 	public static void main(String args[]) throws Exception{
-		Parser parser = new Parser("VM/SimpleAdd.vm");
-		CodeWriter writer = new CodeWriter("Asm/SimpleAdd.asm");
+		Parser parser = new Parser("VM/StackTest.vm");
+		CodeWriter writer = new CodeWriter("Asm/StackTest.asm");
 		while(parser.hasMoreCommands()){
 		    parser.advance();
 		    if(parser.commandType() == Parser.C_ARITHMETIC){
