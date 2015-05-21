@@ -110,8 +110,6 @@ public class CodeWriter {
 			} else {
 				if(segment.equals("temp")){
 					writer.write("@R"+(index+add)+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
-				}else{
-					writer.write("@"+(index+add)+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
 				}
 			}
 		}else if(command.equals("pop")){
@@ -119,6 +117,7 @@ public class CodeWriter {
 				writer.write("@"+index+"\nD=A\n@"+reg+"\nD=M+D\n@R13\nM=D\n"+
 					"@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D\n");
 			}else{
+
 				writer.write("@SP\nAM=M-1\nD=M\n@"+(index+add)+"\nM=D\n");
 			}
 

@@ -111,7 +111,7 @@ public class CodeWriter {
 				if(segment.equals("temp")){
 					writer.write("@R"+(index+add)+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
 				}else{
-					writer.write("@"+(index+add)+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
+					writer.write("@"+(index+add));
 				}
 			}
 		}else if(command.equals("pop")){
