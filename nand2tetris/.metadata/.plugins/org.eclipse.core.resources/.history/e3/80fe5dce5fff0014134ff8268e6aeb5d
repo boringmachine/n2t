@@ -105,7 +105,7 @@ public class CodeWriter {
 				writer.write("@"+index+"\n"+"D=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
 			else if(!reg.isEmpty()){
 				writer.write("@"+index+"\n"+"D=A\n@"+reg+"\nA=M+D\nD=M\n"+
-						"@SP\nA=M\nM=D\n@SP\nM=M+1\n");
+						"@SP\nA=M\nM=D\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
 
 			} else {
 				if(segment.equals("temp")){

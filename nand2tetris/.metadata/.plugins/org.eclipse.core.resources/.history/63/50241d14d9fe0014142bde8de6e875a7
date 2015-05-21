@@ -94,8 +94,6 @@ public class CodeWriter {
 	
 	void writePushPop(String command, String segment, int index) throws IOException{
 		String reg = "";
-		int add = 3;
-		if(segment.equals("temp"))add=5;
 		if(segment.equals("local")) reg = "LCL";
 		else if(segment.equals("argument")) reg = "ARG";
 		else if(segment.equals("this")) reg = "THIS";
@@ -103,23 +101,14 @@ public class CodeWriter {
 		if(command.equals("push")){
 			if(segment.equals("constant"))
 				writer.write("@"+index+"\n"+"D=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
-			else if(!reg.isEmpty()){
-				writer.write("@"+index+"\n"+"D=A\n@"+reg+"\nA=M+D\nD=M\n"+
-						"@SP\nA=M\nM=D\n@SP\nM=M+1\n");
+			if(!reg.isEmpty()){
+				writer.write("@"+index+"\n"+"D=A\n@"+reg+"\nD=M+D\n"+
+						"@R13\nM=D\n@R13\nA=M\nM=D\n");
 
-			} else {
-				if(segment.equals("temp")){
-					writer.write("@R"+(index+add)+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
-				}
 			}
 		}else if(command.equals("pop")){
-			if(!segment.equals("pointer")&&!segment.equals("temp")){
-				writer.write("@"+index+"\nD=A\n@"+reg+"\nD=M+D\n@R13\nM=D\n"+
+			writer.write("@"+index+"\nD=A\n@"+reg+"D=M+D\n@R13\nM=D\n"+
 					"@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D\n");
-			}else{
-
-				writer.write("@SP\nAM=M-1\nD=M\n@"+(index+add)+"\nM=D\n");
-			}
 
 		}
 	}
