@@ -1,7 +1,0 @@
-package Assembler;
-
-import java.util.LinkedHashMap;
-
-public class SymbolTable extends LinkedHashMap<String, Integer> {
-
-}
