@@ -129,7 +129,7 @@ public class CodeWriter {
 		} else if (command.equals("pop")) {
 			if (segment.equals("static")) {
 				writer.write("@SP\nAM=M-1\nD=M\n@" + thisFile + "." + index
-						+ "\nM=D\n");
+						+ "\nM=D\n@SP\nAM=M-1\nD=M\n");
 			} else if (!segment.equals("pointer") && !segment.equals("temp")) {
 				writer.write("@" + index + "\nD=A\n@" + reg
 						+ "\nD=M+D\n@R13\nM=D\n"

@@ -9,7 +9,7 @@ public class VMtranslator {
 		Parser parser1 = new Parser("VM/" + args[0] + ".vm");
 		// Parser parser2 = new Parser("VM/SimpleAdd.vm");
 
-		CodeWriter writer = new CodeWriter(args[0]+".vm", "Asm/" + args[0] + ".asm");
+		CodeWriter writer = new CodeWriter(args[0], "Asm/" + args[0] + ".asm");
 		while (parser1.hasMoreCommands()) {
 			parser1.advance();
 			if (parser1.commandType() == Parser.C_ARITHMETIC) {
