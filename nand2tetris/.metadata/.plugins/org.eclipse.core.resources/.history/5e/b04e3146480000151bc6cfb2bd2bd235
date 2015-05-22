@@ -111,8 +111,7 @@ public class CodeWriter {
 				writer.write("@"+thisFile+"."+index+"\nD=M\n");
 				push();
 			}  else if (!reg.isEmpty()) {
-				writer.write("@" + index + "\n" + "D=A\n");
-				writer.write("@" + reg + "\nA=M+D\nD=M\n");
+				writer.write("@" + index + "\n" + "D=A\n@" + reg + "\nA=M+D\nD=M\n");
 				push();
 			} else {
 				if (segment.equals("temp")) {
