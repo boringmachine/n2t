@@ -9,13 +9,13 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Parser {
-	File file;
-	FileInputStream in;
-	InputStreamReader reader;
+	private File file;
+	private FileInputStream in;
+	private InputStreamReader reader;
 	String command;
 	String type;
-	String arg1;
-	String arg2;
+	private String arg1;
+	private String arg2;
 	StringBuilder data;
 
 	static final int C_ARITHMETIC = 0x1;
@@ -54,14 +54,16 @@ public class Parser {
 				;
 			String[] cmds = command.split(" ");
 			type = cmds[0].toLowerCase();
-			if (cmds.length > 1)
-				arg1 = cmds[1].toLowerCase();
-			else {
+			if (cmds.length > 1){
+				arg1 = cmds[1];
+			} else {
 				arg1 = "";
 			}
-			if (cmds.length > 2)
+			
+			if (cmds.length > 2){
+				cmds[2] = cmds[2].replaceAll("\\p{Space}+", "");
 				arg2 = cmds[2].toLowerCase();
-			else {
+			} else {
 				arg2 = "";
 			}
 		} catch (NoSuchElementException e) {
@@ -77,7 +79,7 @@ public class Parser {
 			return C_LABEL;
 		else if (type.equals("goto"))
 			return C_GOTO;
-		else if (type.equals("if"))
+		else if (type.equals("if-goto"))
 			return C_IF;
 		else if (type.equals("function"))
 			return C_FUNCTION;

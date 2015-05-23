@@ -8,13 +8,13 @@ import java.util.NoSuchElementException;
 
 public class CodeWriter {
 
-	File file;
-	FileOutputStream out;
-	OutputStreamWriter writer;
-	StringBuilder data;
-	String outfile;
-	String thisFile;
-	int labelCounter;
+	private File file;
+	private FileOutputStream out;
+	private OutputStreamWriter writer;
+	private StringBuilder data;
+	private String outfile;
+	private String thisFile;
+	private int labelCounter;
 
 	CodeWriter(String thisFile, String outfile) throws IOException {
 		this.thisFile = thisFile;
@@ -139,7 +139,25 @@ public class CodeWriter {
 
 		}
 	}
+	
+	void writeInit(){
+		
+	}
+	
+	void writeLabel(String label) throws IOException{
+		writer.write("(" + label + ")\n" );
+	}
+	
+	void writeGoto(String label) throws IOException{
+		writer.write("@"+label+"\n");
+		writer.write("0;JMP\n");
+	}
 
+	void writeIf(String label) throws IOException{
+		pop(true);
+		writer.write("@"+label+"\n");
+		writer.write("D;JNE\n");
+	}
 	void close() throws IOException {
 		writer.close();
 		out.close();
