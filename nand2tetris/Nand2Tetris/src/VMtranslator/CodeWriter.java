@@ -15,6 +15,7 @@ public class CodeWriter {
 	private String outfile;
 	private String thisFile;
 	private int labelCounter;
+	private int returnCounter;
 
 	CodeWriter(String thisFile, String outfile) throws IOException {
 		this.thisFile = thisFile;
@@ -24,6 +25,7 @@ public class CodeWriter {
 		writer = new OutputStreamWriter(out);
 		data = new StringBuilder();
 		int labelCounter = 0;
+		int returnCounter = 0;
 	}
 
 	void setFileName(String fileName) throws IOException {
@@ -45,6 +47,7 @@ public class CodeWriter {
 	private void push() throws IOException{
 		writer.write("@SP\n" + "A=M\n" + "M=D\n" + "@SP\n" + "M=M+1\n");
 	}
+	
 	
 	void writeArithmetic(String command) throws Exception {
 		pop(true);
@@ -158,6 +161,61 @@ public class CodeWriter {
 		writer.write("@"+label+"\n");
 		writer.write("D;JNE\n");
 	}
+	
+	void writeCall(String functionName, int numArgs) throws IOException{
+		writer.write("@return-address"+returnCounter+"\nD=M\n");
+		push();
+		writer.write("@LCL\nD=M\n");
+		push();
+		writer.write("@ARG\nD=M\n");
+		push();
+		writer.write("@THIS\nD=M\n");
+		push();
+		writer.write("@THAT\nD=M\n");
+		push();
+		writer.write("@ARG\nR13=M\n");
+		writer.write("@SP\nD=M\n");
+		writer.write("@5\nD=D-A\n");
+		writer.write("@"+numArgs+"\nD=D-A");
+		writer.write("@SP\nD=M\n");
+		writer.write("@LCL\nM=D\n");
+		writeGoto(functionName);
+		writeLabel("@return-address"+returnCounter);
+		returnCounter++;
+	}
+	
+	void writeReturn() throws IOException{
+		writer.write("@LCL\nD=M\n");
+		writer.write("@R14\nM=D\n");
+		writer.write("@5\nD=A\n");
+		writer.write("@R14\nA=M-D\nD=M\n");
+		writer.write("@R13\nM=D\n");
+		pop(true);
+		writer.write("@ARG\nA=M\nM=D\n");
+		writer.write("@ARG\nD=M+1\n");
+		writer.write("@SP\nM=D\n");
+		popR14("THAT");
+		popR14("THIS");
+		popR14("ARG");
+		popR14("LCL");
+		writer.write("@R13\nA=M\n0;JMP");
+
+		
+	}
+	
+	void popR14(String name) throws IOException{
+		writer.write("@R14\nAM=M-1\nD=M\n");
+		writer.write("@"+name+"\nM=D\n");
+
+	}
+	
+	void writeFunction(String functionName, int numLocals) throws IOException{
+		writeLabel(functionName);
+		for(int i=0; i< numLocals; i++){
+			writer.write("@SP\nAM=M+1\nA=A-1\nM=0");
+		}
+	}
+	
 	void close() throws IOException {
 		writer.close();
 		out.close();
