@@ -176,7 +176,7 @@ public class CodeWriter {
 		writer.write("@ARG\nR13=M\n");
 		writer.write("@SP\nD=M\n");
 		writer.write("@5\nD=D-A\n");
-		writer.write("@"+numArgs+"\nD=D-A\n");
+		writer.write("@"+numArgs+"\nD=D-A");
 		writer.write("@SP\nD=M\n");
 		writer.write("@LCL\nM=D\n");
 		writeGoto(functionName);
@@ -198,7 +198,7 @@ public class CodeWriter {
 		popR14("THIS");
 		popR14("ARG");
 		popR14("LCL");
-		writer.write("@R13\nA=M\n0;JMP\n");
+		writer.write("@R13\nA=M\n0;JMP");
 
 		
 	}
@@ -212,7 +212,7 @@ public class CodeWriter {
 	void writeFunction(String functionName, int numLocals) throws IOException{
 		writeLabel(functionName);
 		for(int i=0; i< numLocals; i++){
-			writer.write("@SP\nAM=M+1\nA=A-1\nM=0\n");
+			writer.write("@SP\nAM=M+1\nA=A-1\nM=0");
 		}
 	}
 	

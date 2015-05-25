@@ -21,15 +21,7 @@ public class VMtranslator {
 				writer.writeIf(parser1.arg1());
 			} else if(parser1.commandType() == Parser.C_LABEL){
 				writer.writeLabel(parser1.arg1());
-			} else if(parser1.commandType() == Parser.C_FUNCTION){
-				writer.writeFunction(parser1.arg1(), Integer.parseInt(parser1.arg2()));
-			} else if(parser1.commandType() == Parser.C_CALL){
-				writer.writeCall(parser1.arg1(), Integer.parseInt(parser1.arg2()));
-			} else if(parser1.commandType() == Parser.C_RETURN){
-				writer.writeReturn();
-			}
-			
-			else {
+			} else {
 				writer.writePushPop(parser1.type, parser1.arg1(),
 						Integer.parseInt(parser1.arg2()));
 			}

@@ -23,10 +23,6 @@ public class VMtranslator {
 				writer.writeLabel(parser1.arg1());
 			} else if(parser1.commandType() == Parser.C_FUNCTION){
 				writer.writeFunction(parser1.arg1(), Integer.parseInt(parser1.arg2()));
-			} else if(parser1.commandType() == Parser.C_CALL){
-				writer.writeCall(parser1.arg1(), Integer.parseInt(parser1.arg2()));
-			} else if(parser1.commandType() == Parser.C_RETURN){
-				writer.writeReturn();
 			}
 			
 			else {
