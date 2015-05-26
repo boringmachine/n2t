@@ -3,7 +3,7 @@
 // by Nisan and Schocken, MIT Press.
 // File name: projects/07/MemoryAccess/BasicTest/BasicTest.tst
 
-load BasicTest.asm,
+load BasicTest.vm.asm,
 output-file BasicTest.out,
 compare-to BasicTest.cmp,
 output-list RAM[256]%D1.6.1 RAM[300]%D1.6.1 RAM[401]%D1.6.1 
