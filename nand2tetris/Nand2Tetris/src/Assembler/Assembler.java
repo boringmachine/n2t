@@ -2,12 +2,10 @@ package Assembler;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
-import java.util.Collection;
+import java.util.ArrayList;
 
 public class Assembler {
 
@@ -50,23 +48,37 @@ public class Assembler {
 
 	void createSymbolTable() throws IOException {
 		parser = new Parser(infile);
+		ArrayList<String> defaultCommandList = new ArrayList<String>();
+		defaultCommandList.addAll(new SymbolTable().keySet());
+		while (parser.hasMoreCommands()){
+			int address = 0;
+			parser.advance();
+			if(parser.commandType() == Parser.L_COMMAND){
+				address = counter;
+				table.addEntry(parser.symbol(), address);
+				defaultCommandList.add(parser.symbol());
+			} else {
+				counter++;
+			}
+		}
+		parser = new Parser(infile);
 		while (parser.hasMoreCommands()) {
 			int address = finalAddress;
 			parser.advance();
 			if (parser.symbol().matches("\\d+(\\.\\d+)?")) {
 				address = Integer.parseInt(parser.symbol());
-				counter++;
 			} else if (parser.commandType() == Parser.L_COMMAND) {
-				address = counter;
 			} else {
-				if (!table.contains(parser.symbol()))
+				if (!table.contains(parser.symbol())){
 					address = finalAddress++;
-				counter++;
+				}
 			}
 			//TODO
-			if (!table.contains(parser.symbol())
-					|| parser.commandType() == Parser.L_COMMAND)
-				table.addEntry(parser.symbol(), address);
+			if (parser.commandType() == Parser.A_COMMAND) {
+				if(!defaultCommandList.contains(parser.symbol())){
+					table.addEntry(parser.symbol(), address);
+				}
+			}
 		}
 	}
 
