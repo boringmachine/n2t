@@ -1,6 +1,7 @@
 // Test file for NestedCall test.
 
-load NestedCall.asm,
+//load NestedCall.asm,
+load NestedCall.hack,
 output-file NestedCall.out,
 compare-to NestedCall.cmp,
 output-list RAM[0]%D1.6.1 RAM[1]%D1.6.1 RAM[2]%D1.6.1 RAM[5]%D1.6.1 RAM[6]%D1.6.1;

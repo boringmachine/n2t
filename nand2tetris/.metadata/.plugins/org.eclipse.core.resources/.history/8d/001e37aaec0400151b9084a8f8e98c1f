@@ -63,7 +63,6 @@ public class Assembler {
 					address = finalAddress++;
 				counter++;
 			}
-			//TODO
 			if (!table.contains(parser.symbol())
 					|| parser.commandType() == Parser.L_COMMAND)
 				table.addEntry(parser.symbol(), address);
