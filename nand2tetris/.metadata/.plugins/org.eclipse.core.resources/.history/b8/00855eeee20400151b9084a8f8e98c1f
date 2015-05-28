@@ -14,7 +14,7 @@ public class VMtranslator {
 		boolean fileIsDir = false;
 		if(file.isDirectory()){
 			OutputStreamWriter writer = new OutputStreamWriter(
-					new FileOutputStream(new File(filePath + ".vm")));
+					new FileOutputStream(new File(args[0]+".vm")));
 			StringBuilder asm = new StringBuilder();
 			String files[] = listFiles(file);
 			for(String fileStr : files){
@@ -24,12 +24,14 @@ public class VMtranslator {
 			}
 			writer.write(asm.toString());
 			writer.close();
-			filePath = args[0]+".vm";
+			filePath = args[0]+"/"+args[0]+".vm";
 			fileIsDir = true;
+		} else {
+			filePath = args[0];
 		}
 		
 		Parser parser = new Parser(filePath);
-		CodeWriter writer = new CodeWriter(filePath, filePath.replaceAll(".vm$", ".asm"));
+		CodeWriter writer = new CodeWriter(args[0], args[0].replaceAll(".vm$", ".asm"));
 		if(fileIsDir){
 			writer.writeInit();
 		}

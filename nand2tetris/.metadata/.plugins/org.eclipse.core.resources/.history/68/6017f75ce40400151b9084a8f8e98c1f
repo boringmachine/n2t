@@ -14,7 +14,7 @@ public class VMtranslator {
 		boolean fileIsDir = false;
 		if(file.isDirectory()){
 			OutputStreamWriter writer = new OutputStreamWriter(
-					new FileOutputStream(new File(filePath + ".vm")));
+					new FileOutputStream(new File(args[0]+".vm")));
 			StringBuilder asm = new StringBuilder();
 			String files[] = listFiles(file);
 			for(String fileStr : files){
