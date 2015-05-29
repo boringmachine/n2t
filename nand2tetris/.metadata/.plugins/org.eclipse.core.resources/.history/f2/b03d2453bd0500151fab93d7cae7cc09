@@ -59,6 +59,8 @@ public class Code {
 			c |= 0x0;
 		else if (str.equals("D|A") || str.equals("A|D"))
 			c |= 0x15;
+		else
+			c |= 0x00;
 
 		return c << 6;
 
