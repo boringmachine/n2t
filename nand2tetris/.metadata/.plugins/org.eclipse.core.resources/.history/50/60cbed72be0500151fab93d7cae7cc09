@@ -73,6 +73,7 @@ public class Assembler {
 					address = finalAddress++;
 				}
 			}
+			//TODO
 			if (parser.commandType() == Parser.A_COMMAND) {
 				if(!defaultCommandList.contains(parser.symbol())){
 					table.addEntry(parser.symbol(), address);

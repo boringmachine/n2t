@@ -22,6 +22,7 @@ public class SymbolTable extends LinkedHashMap<String, Integer> {
 		put("KBD", 0x6000);
 	}
 
+	//TODO
 	void addEntry(String symbol, Integer address) {
 		if(!containsKey(symbol)){
 			put(symbol, address);
