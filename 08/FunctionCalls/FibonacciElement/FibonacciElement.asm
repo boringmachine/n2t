@@ -32,8 +32,6 @@ D=M
 AM=M+1
 A=A-1
 M=D
-@SP
-D=M
 @5
 D=A
 @SP
@@ -47,6 +45,9 @@ M=D
 @Sys.init
 0;JMP
 (return-address0)
+(INF_LOOP)
+@INF_LOOP
+0;JMP
 (Sys.init)
 @4
 D=A
@@ -84,8 +85,6 @@ D=M
 AM=M+1
 A=A-1
 M=D
-@SP
-D=M
 @6
 D=A
 @SP
@@ -255,8 +254,6 @@ D=M
 AM=M+1
 A=A-1
 M=D
-@SP
-D=M
 @6
 D=A
 @SP
@@ -326,8 +323,6 @@ D=M
 AM=M+1
 A=A-1
 M=D
-@SP
-D=M
 @6
 D=A
 @SP

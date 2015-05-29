@@ -3,7 +3,8 @@
 // by Nisan and Schocken, MIT Press.
 // File name: projects/07/StackArithmetic/StackTest/StackTest.tst
 
-load StackTest.asm,
+//load StackTest.asm,
+load StackTest.hack,
 output-file StackTest.out,
 compare-to StackTest.cmp,
 output-list RAM[0]%D2.6.2 

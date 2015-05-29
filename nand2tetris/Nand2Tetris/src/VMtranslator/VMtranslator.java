@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class VMtranslator {
 
@@ -19,7 +20,7 @@ public class VMtranslator {
 			String files[] = listFiles(file);
 			for(String fileStr : files){
 				if(fileStr.endsWith(".vm")){
-					asm.append(new Parser(args[0]+"/"+fileStr).data.toString()+"\n");
+					asm.append("#"+fileStr+"\n"+new Parser(args[0]+"/"+fileStr).data.toString()+"\n");
 				}
 			}
 			writer.write(asm.toString());
@@ -36,7 +37,11 @@ public class VMtranslator {
 		while (parser.hasMoreCommands()) {
 			parser.advance();
 			System.out.println(parser.command);
-			if (parser.commandType() == Parser.C_ARITHMETIC) {
+			if (parser.command.startsWith("#")){
+				String command = parser.command;
+				command = command.replace("#", "");
+				writer.setFileName(command);
+			} else if (parser.commandType() == Parser.C_ARITHMETIC) {
 				writer.writeArithmetic(parser.type);
 			} else if(parser.commandType() == Parser.C_GOTO){
 				writer.writeGoto(parser.arg1());

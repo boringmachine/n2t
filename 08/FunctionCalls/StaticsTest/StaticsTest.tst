@@ -4,6 +4,7 @@
 // File name: projects/08/FunctionCalls/StaticsTest/StaticsTest.tst
 
 load StaticsTest.asm,
+//load StaticsTest.hack,
 output-file StaticsTest.out,
 compare-to StaticsTest.cmp,
 output-list RAM[0]%D1.6.1 RAM[261]%D1.6.1 RAM[262]%D1.6.1;

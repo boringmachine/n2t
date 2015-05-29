@@ -29,11 +29,7 @@ public class CodeWriter {
 	}
 
 	void setFileName(String fileName) throws IOException {
-		this.outfile = fileName;
-		file = new File(outfile);
-		out = new FileOutputStream(file);
-		writer = new OutputStreamWriter(out);
-		data = new StringBuilder();
+		this.thisFile = fileName;
 	}
 
 	private void pop(boolean flag) throws IOException{
@@ -48,6 +44,10 @@ public class CodeWriter {
 		writer.write("@SP\n" + "AM=M+1\nA=A-1\nM=D\n");
 	}
 	
+	private void writeInfLoop() throws IOException{
+		writer.write("(INF_LOOP)\n");
+		writer.write("@INF_LOOP\n0;JMP\n");
+	}
 	
 	void writeArithmetic(String command) throws Exception {
 		pop(true);
@@ -95,6 +95,7 @@ public class CodeWriter {
 	void writePushPop(String command, String segment, int index)
 			throws IOException {
 		String reg = "";
+		thisFile = thisFile.replaceAll(".*/", "");
 		int add = 3;
 		if (segment.equals("temp"))
 			add = 5;
@@ -128,8 +129,11 @@ public class CodeWriter {
 			}
 		} else if (command.equals("pop")) {
 			if (segment.equals("static")) {
+				writer.write("@" + thisFile + "." + index + "\nD=A\n");
+				writer.write("@R15\nM=D\n");
 				pop(true);
-				writer.write("@" + thisFile + "." + index + "\nM=D\n");
+				writer.write("@R15\nA=M\nM=D\n");
+
 			} else if (!segment.equals("pointer") && !segment.equals("temp")) {
 				writer.write("@" + index + "\nD=A\n");
 				writer.write("@" + reg + "\nD=M+D\n@R13\nM=D\n");
@@ -147,6 +151,7 @@ public class CodeWriter {
 		writer.write("@256\nD=A\n");
 		writer.write("@SP\nM=D\n");
 		writeCall("Sys.init", 0);
+		writeInfLoop();
 	}
 	
 	void writeLabel(String label) throws IOException{
@@ -168,7 +173,7 @@ public class CodeWriter {
 		writer.write("@return-address"+returnCounter+"\nD=A\n");
 		push();
 		pushReg();
-		writer.write("@SP\nD=M\n");
+		//writer.write("@SP\nD=M\n");
 		writer.write("@"+(5+numArgs)+"\nD=A\n");
 		writer.write("@SP\nD=M-D\n");
 		writer.write("@ARG\nM=D\n");
