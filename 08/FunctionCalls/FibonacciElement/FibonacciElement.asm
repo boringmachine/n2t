@@ -51,6 +51,7 @@ M=D
 (Sys.init)
 @4
 D=A
+
 @SP
 AM=M+1
 A=A-1
@@ -113,6 +114,7 @@ A=A-1
 M=D
 @2
 D=A
+
 @SP
 AM=M+1
 A=A-1
@@ -209,6 +211,7 @@ A=A-1
 M=D
 @2
 D=A
+
 @SP
 AM=M+1
 A=A-1
@@ -278,6 +281,7 @@ A=A-1
 M=D
 @1
 D=A
+
 @SP
 AM=M+1
 A=A-1

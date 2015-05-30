@@ -34,58 +34,67 @@ public class CodeWriter {
 
 	private void pop(boolean flag) throws IOException{
 		if(flag){
-			writer.write("@SP\n" + "AM=M-1\n" + "D=M\n");	
+			write("@SP");
+			write("AM=M-1");
+			write("D=M");
 		} else{
-			writer.write("@SP\n" + "AM=M-1\n" + "A=M\n");	
+			write("@SP");
+			write("AM=M-1");
+			write("A=M");
 		}
 	}
 	
 	private void push() throws IOException{
-		writer.write("@SP\n" + "AM=M+1\nA=A-1\nM=D\n");
+		write("@SP");
+		write("AM=M+1");
+		write("A=A-1");
+		write("M=D");
 	}
 	
 	private void writeInfLoop() throws IOException{
-		writer.write("(INF_LOOP)\n");
-		writer.write("@INF_LOOP\n0;JMP\n");
+		write("(INF_LOOP)");
+		write("@INF_LOOP");
+		write("0;JMP");
 	}
 	
 	void writeArithmetic(String command) throws Exception {
 		pop(true);
 		if (command.equals("add")) {
 			pop(false);
-			writer.write("D=A+D\n");
+			write("D=A+D");
 		} else if (command.equals("sub")) {
 			pop(false);
-			writer.write("D=A-D\n");
+			write("D=A-D");
 		} else if (command.equals("neg")) {
-			writer.write("D=!D\n" + "D=D+1\n");
+			write("D=!D");
+			write("D=D+1");
 		} else if (command.equals("eq") 
 				|| command.equals("gt") 
 				|| command.equals("lt")) {
 			pop(false);
-			writer.write("D=A-D\n");
-			writer.write("@TRUE" + labelCounter + "\n");
+			write("D=A-D");
+			write("@TRUE" + labelCounter);
 			if(command.equals("eq")){
-				writer.write("D;JEQ\n");
+				write("D;JEQ");
 			} else if(command.equals("gt")){
-				writer.write("D;JGT\n");
+				write("D;JGT");
 			} else {
-				writer.write("D;JLT\n");
+				write("D;JLT");
 			}
-			writer.write("D=0\n");
-			writer.write("@FALSE" + labelCounter + "\n");
-			writer.write("0;JMP\n");
-			writer.write("(" + "TRUE" + labelCounter + ")\n");
-			writer.write("D=-1\n");
-			writer.write("(" + "FALSE" + (labelCounter++) + ")\n");
+			write("D=0");
+			write("@FALSE" + labelCounter);
+			write("0;JMP");
+			write("(" + "TRUE" + labelCounter + ")");
+			write("D=-1");
+			write("(" + "FALSE" + (labelCounter++) + ")");
 		} else if (command.equals("and")) {
 			pop(false);
-			writer.write("D=A&D\n");
+			write("D=A&D");
 		} else if (command.equals("or")) {
 			pop(false);
-			writer.write("D=A|D\n");
+			write("D=A|D");
 		} else if (command.equals("not")) {
-			writer.write("D=!D\n");
+			write("D=!D");
 		} else {
 			throw new Exception();
 		}
@@ -109,122 +118,170 @@ public class CodeWriter {
 			reg = "THAT";
 		if (command.equals("push")) {
 			if (segment.equals("constant")) {
-				writer.write("@" + index + "\n"	+ "D=A\n");
+				write("@" + index);
+				write("D=A\n");
 				push();
 			}  else if (segment.equals("static")) {
-				writer.write("@"+thisFile+"."+index+"\nD=M\n");
+				write("@"+thisFile+"."+index);
+				write("D=M");
 				push();
 			}  else if (!reg.isEmpty()) {
-				writer.write("@" + index + "\n" + "D=A\n");
-				writer.write("@" + reg + "\nA=M+D\nD=M\n");
+				write("@" + index);
+				write("D=A");
+				write("@" + reg);
+				write("A=M+D");
+				write("D=M");
 				push();
 			} else {
 				if (segment.equals("temp")) {
-					writer.write("@R" + (index + add) + "\nD=M\n");
+					write("@R" + (index + add));
+					write("D=M");
 					push();
 				} else {
-					writer.write("@" + (index + add) + "\nD=M\n");
+					write("@" + (index + add));
+					write("D=M");
 					push();
 				}
 			}
 		} else if (command.equals("pop")) {
 			if (segment.equals("static")) {
-				writer.write("@" + thisFile + "." + index + "\nD=A\n");
-				writer.write("@R15\nM=D\n");
+				write("@" + thisFile + "." + index);
+				write("D=A");
+				write("@R15");
+				write("M=D");
 				pop(true);
-				writer.write("@R15\nA=M\nM=D\n");
+				write("@R15");
+				write("A=M");
+				write("M=D");
 
 			} else if (!segment.equals("pointer") && !segment.equals("temp")) {
-				writer.write("@" + index + "\nD=A\n");
-				writer.write("@" + reg + "\nD=M+D\n@R13\nM=D\n");
+				write("@" + index);
+				write("D=A");
+				write("@" + reg);
+				write("D=M+D");
+				write("@R13");
+				write("M=D");
 				pop(true);
-				writer.write("@R13\nA=M\nM=D\n");
+				write("@R13");
+				write("A=M");
+				write("M=D");
 			} else {
 				pop(true);
-				writer.write("@" + (index + add) + "\nM=D\n");
+				write("@" + (index + add));
+				write("M=D");
 			}
 
 		}
 	}
 	
 	void writeInit() throws IOException{
-		writer.write("@256\nD=A\n");
-		writer.write("@SP\nM=D\n");
+		write("@256");
+		write("D=A");
+		write("@SP");
+		write("M=D");
 		writeCall("Sys.init", 0);
 		writeInfLoop();
 	}
 	
 	void writeLabel(String label) throws IOException{
-		writer.write("(" + label + ")\n" );
+		write("("+label+")");
 	}
 	
 	void writeGoto(String label) throws IOException{
-		writer.write("@"+label+"\n");
-		writer.write("0;JMP\n");
+		write("@"+label);
+		write("0;JMP");
 	}
 
 	void writeIf(String label) throws IOException{
 		pop(true);
-		writer.write("@"+label+"\n");
-		writer.write("D;JNE\n");
+		write("@"+label);
+		write("D;JNE");
 	}
 	
 	void writeCall(String functionName, int numArgs) throws IOException{
-		writer.write("@return-address"+returnCounter+"\nD=A\n");
+		write("@return-address"+returnCounter);
+		write("D=A");
 		push();
 		pushReg();
-		//writer.write("@SP\nD=M\n");
-		writer.write("@"+(5+numArgs)+"\nD=A\n");
-		writer.write("@SP\nD=M-D\n");
-		writer.write("@ARG\nM=D\n");
-		writer.write("@SP\nD=M\n");
-		writer.write("@LCL\nM=D\n");
+		write("@"+(5+numArgs));
+		write("D=A");
+		write("@SP");
+		write("D=M-D");
+		write("@ARG");
+		write("M=D");
+		write("@SP");
+		write("D=M");
+		write("@LCL");
+		write("M=D");
 		writeGoto(functionName);
 		writeLabel("return-address"+returnCounter);
 		returnCounter++;
 	}
 	
 	void writeReturn() throws IOException{
-		writer.write("@LCL\nD=M\n");
-		writer.write("@R14\nM=D\n");
-		writer.write("@5\nD=A\n");
-		writer.write("@R14\nA=M-D\nD=M\n");
-		writer.write("@R13\nM=D\n");
+		write("@LCL");
+		write("D=M");
+		write("@R14");
+		write("M=D");
+		write("@5");
+		write("D=A");
+		write("@R14");
+		write("A=M-D");
+		write("D=M");
+		write("@R13");
+		write("M=D");
 		pop(true);
-		writer.write("@ARG\nA=M\nM=D\n");
-		writer.write("@ARG\nD=M+1\n");
-		writer.write("@SP\nM=D\n");
+		write("@ARG");
+		write("A=M");
+		write("M=D");
+		write("@ARG");
+		write("D=M+1");
+		write("@SP");
+		write("M=D");
 		popR14("THAT");
 		popR14("THIS");
 		popR14("ARG");
 		popR14("LCL");
-		writer.write("@R13\nA=M\n0;JMP\n");
-
-		
+		write("@R13");
+		write("A=M");
+		write("0;JMP");
 	}
 	
 	void pushReg() throws IOException{
-		writer.write("@LCL\nD=M\n");
+		write("@LCL");
+		write("D=M");
 		push();
-		writer.write("@ARG\nD=M\n");
+		write("@ARG");
+		write("D=M");
 		push();
-		writer.write("@THIS\nD=M\n");
+		write("@THIS");
+		write("D=M");
 		push();
-		writer.write("@THAT\nD=M\n");
+		write("@THAT");
+		write("D=M");
 		push();
 	}
 	
 	void popR14(String name) throws IOException{
-		writer.write("@R14\nAM=M-1\nD=M\n");
-		writer.write("@"+name+"\nM=D\n");
-
+		write("@R14");
+		write("AM=M-1");
+		write("D=M");
+		write("@"+name);
+		write("M=D");
 	}
 	
 	void writeFunction(String functionName, int numLocals) throws IOException{
 		writeLabel(functionName);
 		for(int i=0; i< numLocals; i++){
-			writer.write("@SP\nAM=M+1\nA=A-1\nM=0\n");
+			write("@SP");
+			write("AM=M+1");
+			write("A=A-1");
+			write("M=0");
 		}
+	}
+	
+	private void write(String line) throws IOException{
+			writer.write(line+"\n");
 	}
 	
 	void close() throws IOException {
