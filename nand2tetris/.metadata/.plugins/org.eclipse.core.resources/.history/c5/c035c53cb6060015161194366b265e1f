@@ -119,7 +119,7 @@ public class CodeWriter {
 		if (command.equals("push")) {
 			if (segment.equals("constant")) {
 				write("@" + index);
-				write("D=A");
+				write("D=A\n");
 				push();
 			}  else if (segment.equals("static")) {
 				write("@"+thisFile+"."+index);
