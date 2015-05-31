@@ -1,0 +1,5 @@
+package VMtranslator;
+
+public enum SegmentType {
+
+}

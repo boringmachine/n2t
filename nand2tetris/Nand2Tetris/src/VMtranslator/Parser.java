@@ -17,18 +17,7 @@ public class Parser {
 	private String arg1;
 	private String arg2;
 	StringBuilder data;
-
-	static final int C_ARITHMETIC = 0x1;
-	static final int C_PUSH = 0x2;
-	static final int C_POP = 0x4;
-	static final int C_LABEL = 0x8;
-	static final int C_GOTO = 0x10;
-	static final int C_IF = 0x20;
-	static final int C_FUNCTION = 0x40;
-	static final int C_RETURN = 0x80;
-	static final int C_CALL = 0x100;
-
-	Scanner scan;
+	private Scanner scan;
 
 	Parser(String filename) throws IOException {
 		this.file = new File(filename);
@@ -68,25 +57,73 @@ public class Parser {
 		}
 	}
 
-	int commandType() {
+	static SegmentType segmentType(String segment){
+		if(segment.equals("argument")){
+			return SegmentType.ARGUMENT;
+		} else if(segment.equals("local")){
+			return SegmentType.LOCAL;
+		} else if(segment.equals("static")){
+			return SegmentType.STATIC;
+		} else if(segment.equals("constant")){
+			return SegmentType.CONSTANT;
+		} else if(segment.equals("this")){
+			return SegmentType.THIS;
+		} else if(segment.equals("that")){
+			return SegmentType.THAT;
+		} else if(segment.equals("pointer")){
+			return SegmentType.POINTER;
+		} else if(segment.equals("temp")){
+			return SegmentType.TEMP;
+		} else{
+			return SegmentType.OTHER;
+		}
+	}
+	
+	static CommandType commandType(String type) {
 		if (type.equals("push"))
-			return C_PUSH;
+			return CommandType.C_PUSH;
 		else if (type.equals("pop"))
-			return C_POP;
+			return CommandType.C_POP;
 		else if (type.equals("label"))
-			return C_LABEL;
+			return CommandType.C_LABEL;
 		else if (type.equals("goto"))
-			return C_GOTO;
+			return CommandType.C_GOTO;
 		else if (type.equals("if-goto"))
-			return C_IF;
+			return CommandType.C_IF;
 		else if (type.equals("function"))
-			return C_FUNCTION;
+			return CommandType.C_FUNCTION;
 		else if (type.equals("return"))
-			return C_RETURN;
+			return CommandType.C_RETURN;
 		else if (type.equals("call"))
-			return C_CALL;
+			return CommandType.C_CALL;
+		else if(type.matches("add|sub|neg|eq|gt|lt|not|and|or"))
+			return CommandType.C_ARITHMETIC;
 		else
-			return C_ARITHMETIC;
+			return CommandType.C_OTHER;
+	}
+	
+	static ArithmeticType arismeticType(String command){
+		if (command.equals("add")) {
+			return ArithmeticType.ADD;
+		} else if(command.equals("sub")){
+			return ArithmeticType.SUB;
+		} else if(command.equals("neg")){
+			return ArithmeticType.NEG;
+		} else if(command.equals("eq")){
+			return ArithmeticType.EQ;
+		} else if(command.equals("gt")){
+			return ArithmeticType.GT;
+		} else if(command.equals("lt")){
+			return ArithmeticType.LT;
+		} else if(command.equals("and")){
+			return ArithmeticType.AND;
+		} else if(command.equals("or")){
+			return ArithmeticType.OR;
+		} else if(command.equals("not")){
+			return ArithmeticType.NOT;
+		} else {
+			return ArithmeticType.OTHER;
+		}
 	}
 
 	String arg1() {
@@ -105,7 +142,7 @@ public class Parser {
 			a.advance();
 			System.out.println("CMD   :" + a.command);
 			System.out.println("TYPE  :" + a.type);
-			System.out.println("TYPE  :" + a.commandType());
+			System.out.println("TYPE  :" + a.commandType(a.type));
 			System.out.println("ARG1  :" + a.arg1);
 			System.out.println("ARG2  :" + a.arg2);
 

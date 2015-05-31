@@ -3,25 +3,28 @@ package Assembler;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class Assembler {
 
-	private File file;
-	private FileOutputStream out;
-	private Parser parser;
-	private SymbolTable table;
-	private int finalAddress;
-	private ByteBuffer data;
-	private int index = 0;
-	private String infile;
-	private int counter = 0;
+	File file;
+	FileOutputStream out;
+	OutputStreamWriter writer;
+	Parser parser;
+	SymbolTable table;
+	int finalAddress;
+	ByteBuffer data;
+	int index = 0;
+	String infile;
+	int counter = 0;
 
 	Assembler(String infile, String outfile) throws IOException {
 		this.infile = infile;
 		file = new File(outfile);
 		out = new FileOutputStream(file);
+		writer = new OutputStreamWriter(out);
 		table = new SymbolTable();
 		data = ByteBuffer.allocate(0x10000);
 		finalAddress = 0x10;
@@ -47,10 +50,10 @@ public class Assembler {
 		parser = new Parser(infile);
 		ArrayList<String> defaultCommandList = new ArrayList<String>();
 		defaultCommandList.addAll(new SymbolTable().keySet());
-		while (parser.hasMoreCommands()) {
+		while (parser.hasMoreCommands()){
 			int address = 0;
 			parser.advance();
-			if (parser.commandType() == Parser.L_COMMAND) {
+			if(parser.commandType() == Parser.L_COMMAND){
 				address = counter;
 				table.addEntry(parser.symbol(), address);
 				defaultCommandList.add(parser.symbol());
@@ -62,17 +65,19 @@ public class Assembler {
 		while (parser.hasMoreCommands()) {
 			int address = finalAddress;
 			parser.advance();
-			if (parser.commandType() == Parser.L_COMMAND) {}
-			else if (parser.commandType() == Parser.A_COMMAND) {
-				if (parser.symbol().matches("\\d+(\\.\\d+)?")) {
-					address = Integer.parseInt(parser.symbol());
-				}else {
-					if (!table.contains(parser.symbol())) {
-						address = finalAddress++;
-					}
+			if (parser.symbol().matches("\\d+(\\.\\d+)?")) {
+				address = Integer.parseInt(parser.symbol());
+			} else if (parser.commandType() == Parser.L_COMMAND) {
+			} else {
+				if (!table.contains(parser.symbol())){
+					address = finalAddress;
 				}
-				if (!defaultCommandList.contains(parser.symbol())) {
+			}
+			//TODO
+			if (parser.commandType() == Parser.A_COMMAND) {
+				if(!defaultCommandList.contains(parser.symbol())){
 					table.addEntry(parser.symbol(), address);
+					finalAddress++;
 				}
 			}
 		}

@@ -44,33 +44,38 @@ public class VMtranslator {
 				command = command.replace("#", "");
 				writer.setFileName(command);
 			}
-			switch (parser.commandType()) {
-			case Parser.C_ARITHMETIC:
+			switch (Parser.commandType(parser.type)) {
+			case C_ARITHMETIC:
 				writer.writeArithmetic(parser.type);
 				break;
-			case Parser.C_GOTO:
+			case C_GOTO:
 				writer.writeGoto(parser.arg1());
 				break;
-			case Parser.C_IF:
+			case C_IF:
 				writer.writeIf(parser.arg1());
 				break;
-			case Parser.C_LABEL:
+			case C_LABEL:
 				writer.writeLabel(parser.arg1());
 				break;
-			case Parser.C_FUNCTION:
+			case C_FUNCTION:
 				writer.writeFunction(parser.arg1(),
 						Integer.parseInt(parser.arg2()));
 				break;
-			case Parser.C_CALL:
+			case C_CALL:
 				writer.writeCall(parser.arg1(), Integer.parseInt(parser.arg2()));
 				break;
-			case Parser.C_RETURN:
+			case C_RETURN:
 				writer.writeReturn();
 				break;
-			case Parser.C_PUSH:
-			case Parser.C_POP:
+			case C_PUSH:
 				writer.writePushPop(parser.type, parser.arg1(),
 						Integer.parseInt(parser.arg2()));
+				break;
+			case C_POP:
+				writer.writePushPop(parser.type, parser.arg1(),
+						Integer.parseInt(parser.arg2()));
+				break;
+			default:
 				break;
 			}
 		}
