@@ -5,24 +5,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Parser {
 
-	File file;
-	FileInputStream in;
-	InputStreamReader reader;
-	String command;
-	String symbol;
-	String data;
+	private File file;
+	private FileInputStream in;
+	private InputStreamReader reader;
+	private String command;
+	private String symbol;
+	private String data;
+	private Scanner scan;
 
 	static final int A_COMMAND = 0x1;
 	static final int C_COMMAND = 0x2;
 	static final int L_COMMAND = 0x4;
-
-	Scanner scan;
 
 	Parser(String filename) throws IOException {
 		this.file = new File(filename);

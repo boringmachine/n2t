@@ -23,13 +23,13 @@ public class SymbolTable extends LinkedHashMap<String, Integer> {
 	}
 
 	void addEntry(String symbol, Integer address) {
-		if(!containsKey(symbol)){
+		if (!containsKey(symbol)) {
 			put(symbol, address);
-		}else{
+		} else {
 			remove(symbol);
 			put(symbol, address);
 		}
-		
+
 	}
 
 	boolean contains(String symbol) {

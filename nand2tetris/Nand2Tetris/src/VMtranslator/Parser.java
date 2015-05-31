@@ -48,24 +48,22 @@ public class Parser {
 	}
 
 	void advance() {
+		arg1 = "";
+		arg2 = "";
 		try {
 			while ((command = scan.nextLine())
 					.matches("\\r|\\r\\n||\\n||\\n\\r"))
 				;
 			String[] cmds = command.split(" ");
 			type = cmds[0].toLowerCase().replaceAll("\\p{Space}+", "");
-			if (cmds.length > 1){
+			if (cmds.length > 1) {
 				arg1 = cmds[1].replaceAll("\\p{Space}+", "");
-			} else {
-				arg1 = "";
 			}
-			
-			if (cmds.length > 2){
-				cmds[2] = cmds[2].replaceAll("\\p{Space}+", "");
-				arg2 = cmds[2];
-			} else {
-				arg2 = "";
+
+			if (cmds.length > 2) {
+				arg2 = cmds[2].replaceAll("\\p{Space}+", "");
 			}
+
 		} catch (NoSuchElementException e) {
 		}
 	}

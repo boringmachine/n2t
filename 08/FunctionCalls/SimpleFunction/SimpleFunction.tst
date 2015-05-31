@@ -3,7 +3,8 @@
 // by Nisan and Schocken, MIT Press.
 // File name: projects/08/FunctionCalls/SimpleFunction/SimpleFunction.tst
 
-load SimpleFunction.asm,
+load SimpleFunction.hack,
+//load SimpleFunction.asm,
 output-file SimpleFunction.out,
 compare-to SimpleFunction.cmp,
 output-list RAM[0]%D1.6.1 RAM[1]%D1.6.1 RAM[2]%D1.6.1 

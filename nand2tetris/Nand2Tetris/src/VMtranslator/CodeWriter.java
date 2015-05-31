@@ -4,99 +4,97 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.NoSuchElementException;
 
 public class CodeWriter {
 
 	private File file;
 	private FileOutputStream out;
 	private OutputStreamWriter writer;
-	private StringBuilder data;
-	private String outfile;
 	private String thisFile;
 	private int labelCounter;
 	private int returnCounter;
 
 	CodeWriter(String thisFile, String outfile) throws IOException {
 		this.thisFile = thisFile;
-		this.outfile = outfile;
 		file = new File(outfile);
 		out = new FileOutputStream(file);
 		writer = new OutputStreamWriter(out);
-		data = new StringBuilder();
-		int labelCounter = 0;
-		int returnCounter = 0;
+		labelCounter = 0;
+		returnCounter = 0;
 	}
 
 	void setFileName(String fileName) throws IOException {
 		this.thisFile = fileName;
 	}
 
-	private void pop(boolean flag) throws IOException{
-		if(flag){
-			write("@SP");
-			write("AM=M-1");
-			write("D=M");
-		} else{
-			write("@SP");
-			write("AM=M-1");
-			write("A=M");
+	private void asm(String line) throws IOException {
+		writer.write(line + "\n");
+	}
+
+	private void pop(boolean flag) throws IOException {
+		if (flag) {
+			asm("@SP");
+			asm("AM=M-1");
+			asm("D=M");
+		} else {
+			asm("@SP");
+			asm("AM=M-1");
+			asm("A=M");
 		}
 	}
-	
-	private void push() throws IOException{
-		write("@SP");
-		write("AM=M+1");
-		write("A=A-1");
-		write("M=D");
+
+	private void push() throws IOException {
+		asm("@SP");
+		asm("AM=M+1");
+		asm("A=A-1");
+		asm("M=D");
 	}
-	
-	private void writeInfLoop() throws IOException{
-		write("(INF_LOOP)");
-		write("@INF_LOOP");
-		write("0;JMP");
+
+	private void writeInfLoop() throws IOException {
+		asm("(INF_LOOP)");
+		asm("@INF_LOOP");
+		asm("0;JMP");
 	}
-	
+
 	void writeArithmetic(String command) throws Exception {
 		pop(true);
 		if (command.equals("add")) {
 			pop(false);
-			write("D=A+D");
+			asm("D=A+D");
 		} else if (command.equals("sub")) {
 			pop(false);
-			write("D=A-D");
+			asm("D=A-D");
 		} else if (command.equals("neg")) {
-			write("D=!D");
-			write("D=D+1");
-		} else if (command.equals("eq") 
-				|| command.equals("gt") 
+			asm("D=!D");
+			asm("D=D+1");
+		} else if (command.equals("eq") || command.equals("gt")
 				|| command.equals("lt")) {
 			pop(false);
-			write("D=A-D");
-			write("@TRUE" + labelCounter);
-			if(command.equals("eq")){
-				write("D;JEQ");
-			} else if(command.equals("gt")){
-				write("D;JGT");
+			asm("D=A-D");
+			asm("@TRUE" + labelCounter);
+			if (command.equals("eq")) {
+				asm("D;JEQ");
+			} else if (command.equals("gt")) {
+				asm("D;JGT");
 			} else {
-				write("D;JLT");
+				asm("D;JLT");
 			}
-			write("D=0");
-			write("@FALSE" + labelCounter);
-			write("0;JMP");
-			write("(" + "TRUE" + labelCounter + ")");
-			write("D=-1");
-			write("(" + "FALSE" + (labelCounter++) + ")");
+			asm("D=0");
+			asm("@FALSE" + labelCounter);
+			asm("0;JMP");
+			asm("(" + "TRUE" + labelCounter + ")");
+			asm("D=-1");
+			asm("(" + "FALSE" + (labelCounter++) + ")");
 		} else if (command.equals("and")) {
 			pop(false);
-			write("D=A&D");
+			asm("D=A&D");
 		} else if (command.equals("or")) {
 			pop(false);
-			write("D=A|D");
+			asm("D=A|D");
 		} else if (command.equals("not")) {
-			write("D=!D");
+			asm("D=!D");
 		} else {
-			throw new Exception();
+			return;
 		}
 		push();
 	}
@@ -118,172 +116,168 @@ public class CodeWriter {
 			reg = "THAT";
 		if (command.equals("push")) {
 			if (segment.equals("constant")) {
-				write("@" + index);
-				write("D=A");
+				asm("@" + index);
+				asm("D=A");
 				push();
-			}  else if (segment.equals("static")) {
-				write("@"+thisFile+"."+index);
-				write("D=M");
+			} else if (segment.equals("static")) {
+				asm("@" + thisFile + "." + index);
+				asm("D=M");
 				push();
-			}  else if (!reg.isEmpty()) {
-				write("@" + index);
-				write("D=A");
-				write("@" + reg);
-				write("A=M+D");
-				write("D=M");
+			} else if (!reg.isEmpty()) {
+				asm("@" + index);
+				asm("D=A");
+				asm("@" + reg);
+				asm("A=M+D");
+				asm("D=M");
 				push();
 			} else {
 				if (segment.equals("temp")) {
-					write("@R" + (index + add));
-					write("D=M");
+					asm("@R" + (index + add));
+					asm("D=M");
 					push();
 				} else {
-					write("@" + (index + add));
-					write("D=M");
+					asm("@" + (index + add));
+					asm("D=M");
 					push();
 				}
 			}
 		} else if (command.equals("pop")) {
 			if (segment.equals("static")) {
-				write("@" + thisFile + "." + index);
-				write("D=A");
-				write("@R15");
-				write("M=D");
+				asm("@" + thisFile + "." + index);
+				asm("D=A");
+				asm("@R15");
+				asm("M=D");
 				pop(true);
-				write("@R15");
-				write("A=M");
-				write("M=D");
+				asm("@R15");
+				asm("A=M");
+				asm("M=D");
 
 			} else if (!segment.equals("pointer") && !segment.equals("temp")) {
-				write("@" + index);
-				write("D=A");
-				write("@" + reg);
-				write("D=M+D");
-				write("@R13");
-				write("M=D");
+				asm("@" + index);
+				asm("D=A");
+				asm("@" + reg);
+				asm("D=M+D");
+				asm("@R13");
+				asm("M=D");
 				pop(true);
-				write("@R13");
-				write("A=M");
-				write("M=D");
+				asm("@R13");
+				asm("A=M");
+				asm("M=D");
 			} else {
 				pop(true);
-				write("@" + (index + add));
-				write("M=D");
+				asm("@" + (index + add));
+				asm("M=D");
 			}
 
 		}
 	}
-	
-	void writeInit() throws IOException{
-		write("@256");
-		write("D=A");
-		write("@SP");
-		write("M=D");
+
+	void writeInit() throws IOException {
+		asm("@256");
+		asm("D=A");
+		asm("@SP");
+		asm("M=D");
 		writeCall("Sys.init", 0);
 		writeInfLoop();
 	}
-	
-	void writeLabel(String label) throws IOException{
-		write("("+label+")");
-	}
-	
-	void writeGoto(String label) throws IOException{
-		write("@"+label);
-		write("0;JMP");
+
+	void writeLabel(String label) throws IOException {
+		asm("(" + label + ")");
 	}
 
-	void writeIf(String label) throws IOException{
-		pop(true);
-		write("@"+label);
-		write("D;JNE");
+	void writeGoto(String label) throws IOException {
+		asm("@" + label);
+		asm("0;JMP");
 	}
-	
-	void writeCall(String functionName, int numArgs) throws IOException{
-		write("@return-address"+returnCounter);
-		write("D=A");
+
+	void writeIf(String label) throws IOException {
+		pop(true);
+		asm("@" + label);
+		asm("D;JNE");
+	}
+
+	void writeCall(String functionName, int numArgs) throws IOException {
+		asm("@return-address" + returnCounter);
+		asm("D=A");
 		push();
 		pushReg();
-		write("@"+(5+numArgs));
-		write("D=A");
-		write("@SP");
-		write("D=M-D");
-		write("@ARG");
-		write("M=D");
-		write("@SP");
-		write("D=M");
-		write("@LCL");
-		write("M=D");
+		asm("@" + (5 + numArgs));
+		asm("D=A");
+		asm("@SP");
+		asm("D=M-D");
+		asm("@ARG");
+		asm("M=D");
+		asm("@SP");
+		asm("D=M");
+		asm("@LCL");
+		asm("M=D");
 		writeGoto(functionName);
-		writeLabel("return-address"+returnCounter);
+		writeLabel("return-address" + returnCounter);
 		returnCounter++;
 	}
-	
-	void writeReturn() throws IOException{
-		write("@LCL");
-		write("D=M");
-		write("@R14");
-		write("M=D");
-		write("@5");
-		write("D=A");
-		write("@R14");
-		write("A=M-D");
-		write("D=M");
-		write("@R13");
-		write("M=D");
+
+	void writeReturn() throws IOException {
+		asm("@LCL");
+		asm("D=M");
+		asm("@R14");
+		asm("M=D");
+		asm("@5");
+		asm("D=A");
+		asm("@R14");
+		asm("A=M-D");
+		asm("D=M");
+		asm("@R13");
+		asm("M=D");
 		pop(true);
-		write("@ARG");
-		write("A=M");
-		write("M=D");
-		write("@ARG");
-		write("D=M+1");
-		write("@SP");
-		write("M=D");
+		asm("@ARG");
+		asm("A=M");
+		asm("M=D");
+		asm("@ARG");
+		asm("D=M+1");
+		asm("@SP");
+		asm("M=D");
 		popR14("THAT");
 		popR14("THIS");
 		popR14("ARG");
 		popR14("LCL");
-		write("@R13");
-		write("A=M");
-		write("0;JMP");
+		asm("@R13");
+		asm("A=M");
+		asm("0;JMP");
 	}
-	
-	void pushReg() throws IOException{
-		write("@LCL");
-		write("D=M");
+
+	void pushReg() throws IOException {
+		asm("@LCL");
+		asm("D=M");
 		push();
-		write("@ARG");
-		write("D=M");
+		asm("@ARG");
+		asm("D=M");
 		push();
-		write("@THIS");
-		write("D=M");
+		asm("@THIS");
+		asm("D=M");
 		push();
-		write("@THAT");
-		write("D=M");
+		asm("@THAT");
+		asm("D=M");
 		push();
 	}
-	
-	void popR14(String name) throws IOException{
-		write("@R14");
-		write("AM=M-1");
-		write("D=M");
-		write("@"+name);
-		write("M=D");
+
+	void popR14(String name) throws IOException {
+		asm("@R14");
+		asm("AM=M-1");
+		asm("D=M");
+		asm("@" + name);
+		asm("M=D");
 	}
-	
-	void writeFunction(String functionName, int numLocals) throws IOException{
+
+	void writeFunction(String functionName, int numLocals) throws IOException {
 		writeLabel(functionName);
-		for(int i=0; i< numLocals; i++){
-			write("@SP");
-			write("AM=M+1");
-			write("A=A-1");
-			write("M=0");
+		for (int i = 0; i < numLocals; i++) {
+			asm("@SP");
+			asm("AM=M+1");
+			asm("A=A-1");
+			asm("M=0");
 		}
 	}
-	
-	private void write(String line) throws IOException{
-			writer.write(line+"\n");
-	}
-	
+
 	void close() throws IOException {
 		writer.close();
 		out.close();
