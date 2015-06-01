@@ -57,15 +57,17 @@ public class CodeWriter {
 	private String setReg(String segment){
 		switch(Parser.segmentType(segment)){
 		case LOCAL:
-			return "LCL";
+			return  "LCL";
+			break;
 		case ARGUMENT:
-			return "ARG";
+			return  "ARG";
+			break;
 		case THIS:
-			return "THIS";
+			return  "THIS";
+			break;
 		case THAT:
-			return "THAT";
-		default:
-			return "";
+			return  "THAT";
+			break;
 			
 		}
 	}
@@ -130,7 +132,7 @@ public class CodeWriter {
 
 	void writePushPop(String command, String segment, int index)
 			throws IOException {
-		String reg = setReg(segment);
+		String reg = "";
 		thisFile = thisFile.replaceAll(".*/", "");
 		int add = 0;		
 		
@@ -151,9 +153,19 @@ public class CodeWriter {
 				push();
 				break;
 			case LOCAL:
+				reg = "LCL";
+				pushReg(reg, index);
+				break;
 			case ARGUMENT:
+				reg = "ARG";
+				pushReg(reg, index);
+				break;
 			case THIS:
+				reg = "THIS";
+				pushReg(reg, index);
+				break;
 			case THAT:
+				reg = "THAT";
 				pushReg(reg, index);
 				break;
 			case CONSTANT:

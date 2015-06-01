@@ -53,22 +53,6 @@ public class CodeWriter {
 		asm("@INF_LOOP");
 		asm("0;JMP");
 	}
-	
-	private String setReg(String segment){
-		switch(Parser.segmentType(segment)){
-		case LOCAL:
-			return "LCL";
-		case ARGUMENT:
-			return "ARG";
-		case THIS:
-			return "THIS";
-		case THAT:
-			return "THAT";
-		default:
-			return "";
-			
-		}
-	}
 
 	void writeArithmetic(String command) throws Exception {
 		pop(true);
@@ -130,10 +114,9 @@ public class CodeWriter {
 
 	void writePushPop(String command, String segment, int index)
 			throws IOException {
-		String reg = setReg(segment);
+		String reg = "";
 		thisFile = thisFile.replaceAll(".*/", "");
 		int add = 0;		
-		
 		
 		switch(Parser.commandType(command)){
 		case C_PUSH:
@@ -151,9 +134,19 @@ public class CodeWriter {
 				push();
 				break;
 			case LOCAL:
+				reg = "LCL";
+				pushReg(reg, index);
+				break;
 			case ARGUMENT:
+				reg = "ARG";
+				pushReg(reg, index);
+				break;
 			case THIS:
+				reg = "THIS";
+				pushReg(reg, index);
+				break;
 			case THAT:
+				reg = "THAT";
 				pushReg(reg, index);
 				break;
 			case CONSTANT:
