@@ -1,0 +1,76 @@
+package Compiler;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+public class JackTokenizer {
+
+	private File file;
+	private FileInputStream in;
+	private InputStreamReader reader;
+	private Scanner scan;
+	private String data;
+	private char symbol;
+	private String identifier;
+	private String keyword;
+	
+	JackTokenizer(String filename) throws IOException{
+		this.file = new File(filename);
+		in = new FileInputStream(file);
+		reader = new InputStreamReader(in);
+		char[] data = new char[(int) file.length()];
+		reader.read(data);
+		this.data = (new String(data))
+				.replaceAll("//.*\n?", "")
+				.replaceAll("/\\*.+\\*/", "")
+				.replaceAll(
+						"(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)",
+						" $1 ");
+		reader = new InputStreamReader(new ByteArrayInputStream(
+				this.data.getBytes("UTF-8")));
+		scan = new Scanner(this.data);
+	}
+	
+	boolean hasMoreTokens(){
+		return scan.hasNext();
+	}
+	
+	void advance() {
+		String str = scan.next();
+		if(str.matches("\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~")){
+			symbol = str.charAt(0);
+			keyword = "";
+			identifier = "";
+		} else if("")
+	}
+	
+	TokenType tokenType(){
+		return TokenType.KEYWORD;
+	}
+	
+	KeyWord keyWord(){
+		return KeyWord.BOOLEAN;
+	}
+	
+	char symbol(){
+		return symbol;
+	}
+	
+	String identifier(){
+		return identifier;
+	}
+	
+	int intVal(){
+		return 0;
+	}
+	
+	String stringVal(){
+		return "";
+	}
+	
+}

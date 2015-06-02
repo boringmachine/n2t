@@ -9,16 +9,16 @@ import java.util.ArrayList;
 
 public class Assembler {
 
-	File file;
-	FileOutputStream out;
-	OutputStreamWriter writer;
-	Parser parser;
-	SymbolTable table;
-	int finalAddress;
-	ByteBuffer data;
-	int index = 0;
-	String infile;
-	int counter = 0;
+	private File file;
+	private FileOutputStream out;
+	private OutputStreamWriter writer;
+	private Parser parser;
+	private SymbolTable table;
+	private int finalAddress;
+	private ByteBuffer data;
+	private int index = 0;
+	private String infile;
+	private int counter = 0;
 
 	Assembler(String infile, String outfile) throws IOException {
 		this.infile = infile;
