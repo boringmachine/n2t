@@ -50,7 +50,6 @@ public class JackTokenizer {
 		keyword = "";
 		identifier = "";
 		integerConstant = "";
-		stringConstant = "";
 		if(str.matches("\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~")){
 			symbol = str;
 		} else if(str.matches("class|constructor|function|method|field|static|var|true|false|null|this|let|do|if|else|while|return")){

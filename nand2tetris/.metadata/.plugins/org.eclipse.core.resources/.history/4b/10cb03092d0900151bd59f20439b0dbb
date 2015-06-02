@@ -31,7 +31,7 @@ public class JackTokenizer {
 		reader.read(data);
 		this.data = (new String(data))
 				.replaceAll("(?://.*)|(/\\*(?:.|[\\n\\r])*?\\*/)", "")
-				.replaceAll("\n|\r|\n\r|\r\n", "")
+				.replaceAll("\n", "")
 				.replaceAll(
 						"(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)",
 						" $1 ");
@@ -50,7 +50,6 @@ public class JackTokenizer {
 		keyword = "";
 		identifier = "";
 		integerConstant = "";
-		stringConstant = "";
 		if(str.matches("\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~")){
 			symbol = str;
 		} else if(str.matches("class|constructor|function|method|field|static|var|true|false|null|this|let|do|if|else|while|return")){
@@ -149,20 +148,7 @@ public class JackTokenizer {
 		JackTokenizer a = new JackTokenizer("Square/SquareGame.jack");
 		System.out.println(a.data);
 		while (a.hasMoreTokens()) {
-			System.out.println("TOKEN      :" + a.advance());
-			System.out.println("SYMBOL     :" + a.symbol);
-			System.out.println("IDENTIFIER :" + a.identifier);
-			System.out.println("KEYWORD    :" + a.keyword);
-			System.out.println("INTCONST   :" + a.integerConstant);
-			System.out.println("STRINGCONST:" + a.stringConstant);
-			System.out.println();
-
-
-
-
-
-
-			
+			System.out.println("TOKEN   :" + a.advance());
 		}
 	}
 }
