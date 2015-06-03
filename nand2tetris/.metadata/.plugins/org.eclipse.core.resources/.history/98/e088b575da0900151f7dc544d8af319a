@@ -1,0 +1,134 @@
+package Compiler;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+public class CompilationEngine {
+
+	JackTokenizer tokenizer;
+	private File file;
+	private FileOutputStream out;
+	private OutputStreamWriter writer;
+	private int tabCounter;
+
+	
+	CompilationEngine(String infile, String outfile) throws Exception{
+		tokenizer = new JackTokenizer(infile);
+		file = new File(outfile);
+		out = new FileOutputStream(file);
+		writer = new OutputStreamWriter(out);
+		tabCounter = 0;
+		tokenizer.advance();
+		if(isCorrectToken(TokenType.KEYWORD) &&  isCorrectKeyword(KeyWord.CLASS)){
+			compileClass();
+		}
+	}
+	
+	void compileClass() throws Exception{
+		write("<class>");
+		
+		tabCounter++;
+		writeKeyword();
+		
+		tokenizer.advance();
+		if(isCorrectToken(TokenType.IDENTIFIER)){writeIdentifier();}
+		
+		tokenizer.advance();
+		if(isCorrectSymbol('{')){writeSymbol();}
+		
+		while(tokenizer.advance().matches("static|field")){
+			compileClassVarDec();
+		}
+		tabCounter=1;
+		do{
+			compileSubroutineDec();
+		}while(tokenizer.advance().matches("constructor|function|method"));
+		
+		tabCounter=1;
+		if(isCorrectSymbol('}')){
+			writeSymbol();
+		}
+		tabCounter=0;
+		write("</class>");
+	}
+	
+	void compileSubroutineDec() throws Exception{
+		if(isCorrectToken(TokenType.KEYWORD) && 
+				(isCorrectKeyword(KeyWord.CONSTRUCTOR) || 
+				isCorrectKeyword(KeyWord.FUNCTION) ||
+				isCorrectKeyword(KeyWord.METHOD))){
+			writeKeyword();
+		}
+		tokenizer.advance();
+		
+	}
+	
+	void compileClassVarDec() throws Exception{
+		int tmp = tabCounter;
+		write("<classVarDec>");
+		tabCounter++;
+		compileStatements();
+		tabCounter = tmp;
+		write("</classVarDec>");
+	}
+	
+	void compileStatements() throws Exception{
+		while(!tokenizer.advance().equals(";")){
+			if(tokenizer.tokenType() == TokenType.IDENTIFIER){
+				writeIdentifier();
+			} else if(tokenizer.tokenType() == TokenType.SYMBOL){
+				writeSymbol();
+			} else if(tokenizer.tokenType() == TokenType.KEYWORD){
+				writeKeyword();
+			} else if(tokenizer.tokenType() == TokenType.INT_CONST){
+				writeIntConst();
+			} else if(tokenizer.tokenType() == TokenType.STRING_CONST){
+				writeStringConst();
+			}
+		}
+		writeSymbol();
+	};
+
+	private void writeIntConst() throws IOException{
+		write("<integerConstant>"+tokenizer.intVal()+"</integerConstant>");
+	}
+	
+	private void writeStringConst() throws IOException{
+		write("<stringConstant>"+tokenizer.intVal()+"</stringConstant>");
+	}
+	
+	
+	private void writeIdentifier() throws IOException{
+		write("<identifier>"+tokenizer.identifier()+"</identifier>");
+	}
+	
+	private void writeSymbol() throws IOException{
+		write("<symbol>"+tokenizer.symbol()+"</symbol>");
+	}
+	
+	private void writeKeyword() throws IOException{
+		write("<keyword>"+tokenizer.getKeyword()+"</keyword>");
+	}
+	
+	private boolean isCorrectToken(TokenType t) throws Exception{
+		return tokenizer.tokenType() == t;
+	}
+	
+	private boolean isCorrectSymbol(char s) throws Exception{
+		return (tokenizer.tokenType() == TokenType.SYMBOL) && tokenizer.symbol() == s;
+	}
+	
+	private boolean isCorrectKeyword(KeyWord k){
+		return tokenizer.keyWord() == k;
+	}
+	
+	
+	void write(String line) throws IOException{
+		for(int i=0;i<tabCounter;i++){
+			writer.write("\t");
+		}
+		writer.write(line + "\n");
+	}
+}

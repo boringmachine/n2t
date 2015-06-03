@@ -33,8 +33,11 @@ public class JackTokenizer {
 				.replaceAll("(?://.*)|(/\\*(?:.|[\\n\\r])*?\\*/)", "")
 				.replaceAll("\n|\r|\n\r|\r\n", "")
 				.replaceAll(
-						"(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)",
-						" $1 ");
+						"(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)"," $1 ")
+				.replaceAll(" +", " ")
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				.replaceAll("&", "&amp;");
 		reader = new InputStreamReader(new ByteArrayInputStream(
 				this.data.getBytes("UTF-8")));
 		scan = new Scanner(this.data);
@@ -53,7 +56,7 @@ public class JackTokenizer {
 		stringConstant = "";
 		if(str.matches("\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~")){
 			symbol = str;
-		} else if(str.matches("class|constructor|function|method|field|static|var|true|false|null|this|let|do|if|else|while|return")){
+		} else if(str.matches("class|constructor|function|method|field|static|void|var|true|false|null|this|let|do|if|else|while|return")){
 			keyword = str;
 		} else if(str.matches("\\p{Alpha}(\\p{Alnum}|_)*")){
 			identifier = str;
@@ -144,6 +147,10 @@ public class JackTokenizer {
 		return stringConstant;
 	}
 	
+	String getKeyword(){
+		return keyword;
+	}
+	
 	//check token
 	public static void main(String[] argv) throws IOException{
 		JackTokenizer a = new JackTokenizer("Square/SquareGame.jack");
@@ -156,13 +163,6 @@ public class JackTokenizer {
 			System.out.println("INTCONST   :" + a.integerConstant);
 			System.out.println("STRINGCONST:" + a.stringConstant);
 			System.out.println();
-
-
-
-
-
-
-			
 		}
 	}
 }

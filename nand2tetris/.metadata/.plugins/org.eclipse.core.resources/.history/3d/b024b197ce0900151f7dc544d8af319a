@@ -1,0 +1,97 @@
+package Compiler;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+public class CompilationEngine {
+
+	JackTokenizer tokenizer;
+	private File file;
+	private FileOutputStream out;
+	private OutputStreamWriter writer;
+	private int tabCounter;
+
+	
+	CompilationEngine(String infile, String outfile) throws Exception{
+		tokenizer = new JackTokenizer(infile);
+		file = new File(outfile);
+		out = new FileOutputStream(file);
+		writer = new OutputStreamWriter(out);
+		tabCounter = 0;
+		tokenizer.advance();
+		if(isCorrectToken(TokenType.KEYWORD) &&  isCorrectKeyword(KeyWord.CLASS)){
+			compileClass();
+		}
+	}
+	
+	void compileClass() throws Exception{
+		write("<class>", 0);
+		write(tokenizer.getKeyword(), 1);
+		tokenizer.advance();
+		if(isCorrectToken(TokenType.IDENTIFIER)){
+			writeIdentifier(0);
+		}
+		tokenizer.advance();
+		if(isCorrectSymbol('{')){
+			writeSymbol(0);
+		}
+		while(tokenizer.advance().matches("static|field")){
+			compileClassVarDec();
+		}
+		tabCounter=1;
+		do{
+			compileSubroutineDec();
+		}while(tokenizer.advance().matches("constructor|function|method"));
+		
+		tabCounter=1;
+		if(isCorrectSymbol('}')){
+			write(""+tokenizer.symbol(), 0);
+		}
+		tabCounter=0;
+		write("</class>", 0);
+	}
+	
+	void compileClassVarDec() throws IOException{
+		int tmp = tabCounter;
+		write("<classVarDec>", 0);
+		compileStatements();
+		tabCounter = tmp;
+		write("</classVarDec>", 0);
+	}
+	
+	void compileStatements(){};
+
+	private void writeIdentifier() throws IOException{
+		write("<identifier>");
+		write(tokenizer.identifier());
+		write("</identifier>");
+	}
+	
+	private void writeSymbol(int tab) throws IOException{
+		write("<symbol>", tab);
+		write(""+tokenizer.symbol(),  1);
+		write("</symbol>", -1);
+	}
+	
+	private boolean isCorrectToken(TokenType t) throws Exception{
+		return tokenizer.tokenType() == t;
+	}
+	
+	private boolean isCorrectSymbol(char s) throws Exception{
+		return (tokenizer.tokenType() == TokenType.SYMBOL) && tokenizer.symbol() == s;
+	}
+	
+	private boolean isCorrectKeyword(KeyWord k){
+		return tokenizer.keyWord() == k;
+	}
+	
+	
+	void write(String line) throws IOException{
+		for(int i=0;i<tabCounter;i++){
+			writer.write("\t");
+		}
+		writer.write(line + "\n");
+	}
+}
