@@ -54,7 +54,7 @@ public class JackTokenizer {
 		identifier = "";
 		integerConstant = "";
 		stringConstant = "";
-		if(str.matches("\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~")){
+		if(str.matches("^(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)$")){
 			symbol = str;
 		} else if(str.matches("class|constructor|function|method|field|static|void|var|true|false|null|this|let|do|if|else|while|return")){
 			keyword = str;
@@ -153,7 +153,7 @@ public class JackTokenizer {
 	
 	//check token
 	public static void main(String[] argv) throws IOException{
-		JackTokenizer a = new JackTokenizer("Square/SquareGame.jack");
+		JackTokenizer a = new JackTokenizer("sample/Square/SquareGame.jack");
 		System.out.println(a.data);
 		while (a.hasMoreTokens()) {
 			System.out.println("TOKEN      :" + a.advance());

@@ -1,3 +1,5 @@
+// TODO Fix this shit code
+
 package Compiler;
 
 import java.io.File;
@@ -68,15 +70,11 @@ public class CompilationEngine {
 		tokenizer.advance();
 		writeSymbol('(');
 		
-		if(!tokenizer.advance().equals(")")){
-			compileParameterList();
-		} else{
-			writeSymbol(')');
-		}
-		
 		tokenizer.advance();
-		writeSymbol(')');
+		compileParameterList();
 		
+		writeSymbol(')');
+				
 		tokenizer.advance();
 		compileSubroutineBody();
 		
@@ -87,17 +85,19 @@ public class CompilationEngine {
 	
 	void compileParameterList() throws Exception{
 		write("<parameterList>");
-		int tmp = tabCounter++;
-		writeTypeAndIdentifier();
-		
-		while(writeComma()){
-			tokenizer.advance();
+		if(!(tokenizer.symbol() == ')')){
+			int tmp = tabCounter++;
 			writeTypeAndIdentifier();
-			tokenizer.advance();
-		}
-		tabCounter = tmp;
-		write("</parameterList>");
 		
+			while(writeComma()){
+				tokenizer.advance();
+				writeTypeAndIdentifier();
+				tokenizer.advance();
+			}
+			tabCounter = tmp;
+		}
+		write("</parameterList>");
+
 	}
 	
 	private void writeTypeAndIdentifier() throws Exception{
@@ -111,6 +111,169 @@ public class CompilationEngine {
 			return tokenizer.symbol() == ',';
 	}
 	
+	boolean compileLet() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.LET;
+		if(flag){
+			writeKeyword();
+			
+			tokenizer.advance();
+			writeIdentifier();
+			tokenizer.advance();
+			
+			if(writeSymbol('[')){
+				tokenizer.advance();
+				compileExpression();
+				writeSymbol(']');
+				tokenizer.advance();
+			}
+			
+			writeSymbol(';');
+		}
+		return flag;
+	}
+	
+	boolean compileIf() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.IF;
+		if(flag){
+			writeKeyword();
+			
+			tokenizer.advance();
+			writeSymbol('(');
+			
+			tokenizer.advance();
+			compileExpression();
+			
+			tokenizer.advance();
+			writeSymbol(')');
+			
+			tokenizer.advance();
+			writeSymbol('{');
+			
+			tokenizer.advance();
+			compileStatements();
+			
+			tokenizer.advance();
+			writeSymbol('}');
+			
+			if(tokenizer.advance().equals("else")){
+				writeKeyword();
+				
+				tokenizer.advance();
+				writeSymbol('{');
+				
+				tokenizer.advance();
+				compileStatements();
+				
+				tokenizer.advance();
+				writeSymbol('}');
+			};
+		}
+		
+		return flag;
+	}
+	
+	boolean compileWhile() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.WHILE;
+		if(flag){
+			writeKeyword();
+			
+			tokenizer.advance();
+			writeSymbol('(');
+			
+			tokenizer.advance();
+			compileExpression();
+			
+			tokenizer.advance();
+			writeSymbol(')');
+			
+			tokenizer.advance();
+			writeSymbol('{');
+			
+			tokenizer.advance();
+			compileStatements();
+			
+			tokenizer.advance();
+			writeSymbol('}');
+			
+		}
+		return flag;
+
+	}
+	
+	boolean compileDo() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.DO;
+		if(flag){
+			writeKeyword();
+			tokenizer.advance();
+			
+			compileSubroutine();
+			
+			tokenizer.advance();
+			writeSymbol(';');
+		}
+		
+		return flag;
+	}
+	
+	boolean compileReturn() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.RETURN;
+		if(flag){
+			writeKeyword();
+			tokenizer.advance();
+
+			compileExpression();
+			writeSymbol(';');
+		}
+		return flag;
+		
+	}
+	
+	void compileSubroutine() throws Exception{
+		writeIdentifier();
+		
+		tokenizer.advance();
+		if(writeSymbol('.')){
+			tokenizer.advance();
+			writeIdentifier();
+			tokenizer.advance();
+		}
+		
+		writeSymbol('(');
+		
+		tokenizer.advance();
+		compileExpressionList();
+		
+		writeSymbol(')');
+	}
+	
+	
+	
+	void compileExpression() throws Exception{
+		
+		if(compileTerm()){
+			tokenizer.advance();
+		
+			while(compileOp()){
+				tokenizer.advance();
+				compileTerm();
+				tokenizer.advance();
+			}
+		}	
+	}
+	void compileExpressionList() throws Exception{
+		compileExpression();
+		while(writeComma()){
+			compileExpression();
+		}
+	};
+	
+	boolean compileOp() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.SYMBOL;
+		String s = ""+tokenizer.symbol();
+		if((flag = (flag && s.matches("^(+|-|\\*|/|&|\\||<|>|=|~)$"))) && writeSymbol(s.charAt(0)));
+		return flag;
+	}
+	boolean compileTerm(){return true;}
 	void compileSubroutineBody() throws Exception{
 		write("<subroutineBody>");
 		int tmp = tabCounter++;
@@ -118,9 +281,7 @@ public class CompilationEngine {
 		writeSymbol('{');
 		tokenizer.advance();
 
-		while(tokenizer.advance().equals("var")){
-			compileVarDec();
-		}
+		compileVarDec();
 		
 		compileStatements();
 		
@@ -133,23 +294,26 @@ public class CompilationEngine {
 	void compileVarDec() throws Exception{
 		write("<varDec>");
 		int tmp = tabCounter++;
-		writeVar();
-		
-		tokenizer.advance();
-		writeTypeAndIdentifier();
-		while(writeComma()){
+		if(writeVar()){
 			tokenizer.advance();
 			writeTypeAndIdentifier();
-			tokenizer.advance();
+			while(writeComma()){
+				tokenizer.advance();
+				writeTypeAndIdentifier();
+				tokenizer.advance();
+			}
 		}
+		writeSymbol(';');
 		tabCounter = tmp;
 		write("</varDec>");
 	};
 	
-	private void writeVar() throws Exception{
-		if(tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.VAR){
+	private boolean writeVar() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.VAR;
+		if(flag){
 			writeKeyword();
 		}
+		return flag;
 	}
 	
 	private void writeType() throws IOException{
@@ -185,7 +349,15 @@ public class CompilationEngine {
 		write("</classVarDec>");
 	}
 	
+	boolean compileStatement() throws Exception{
+		return compileLet() || compileIf() || compileWhile() || compileDo() || compileReturn();
+	}
+	
+	
 	void compileStatements() throws Exception{
+		while(compileStatement()){
+			tokenizer.advance();
+		};
 	};
 
 	private void writeIntConst() throws IOException{
@@ -203,10 +375,12 @@ public class CompilationEngine {
 		}
 	}
 	
-	private void writeSymbol(char s) throws Exception{
-		if(isCorrectSymbol(s)){
+	private boolean writeSymbol(char s) throws Exception{
+		boolean flag = isCorrectSymbol(s);
+		if(flag){
 			write("<symbol>"+tokenizer.symbol()+"</symbol>");
 		}
+		return flag;
 	}
 	
 	private void writeKeyword() throws IOException{
@@ -238,7 +412,7 @@ public class CompilationEngine {
 	}
 	
 	public static void main(String[] argv) throws Exception{
-		CompilationEngine c = new CompilationEngine("Square/Main.jack", "Square/test.xml");
+		CompilationEngine c = new CompilationEngine("sample/Square/Main.jack", "sample/Square/test.xml");
 	}
 }
 
