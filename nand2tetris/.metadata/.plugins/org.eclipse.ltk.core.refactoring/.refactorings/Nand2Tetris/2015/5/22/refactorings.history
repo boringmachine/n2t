@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename method &apos;VMtranslator.CodeWriter.w(...)&apos; to &apos;write&apos;&#x0A;- Original project: &apos;Nand2Tetris&apos;&#x0A;- Original element: &apos;VMtranslator.CodeWriter.w(...)&apos;&#x0A;- Renamed element: &apos;VMtranslator.CodeWriter.write(...)&apos;&#x0A;- Update references to refactored element" delegate="false" deprecate="true" description="Rename method &apos;w&apos;" flags="589826" id="org.eclipse.jdt.ui.rename.method" input="/src&lt;VMtranslator{CodeWriter.java[CodeWriter~w~QString;" name="write" references="true" stamp="1432980363211" version="1.0"/>
-</session>

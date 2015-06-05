@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Copy package &apos;VMtranslator&apos; to &apos;Nand2Tetris/src&apos;&#x0A;- Original project: &apos;Nand2Tetris&apos;&#x0A;- Destination element: &apos;Nand2Tetris/src&apos;&#x0A;- Original element: &apos;Nand2Tetris/src/VMtranslator&apos;" description="Copy package" destination="/src" element1="/src&lt;VMtranslator" flags="589830" fragments="1" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyPackages" stamp="1431926218087" version="1.0"/>&#x0A;&#x0A;</session>
