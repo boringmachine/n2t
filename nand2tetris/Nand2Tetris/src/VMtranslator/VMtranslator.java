@@ -6,6 +6,14 @@ import java.io.OutputStreamWriter;
 
 public class VMtranslator {
 
+	public static String[] listFiles(final File folder) {
+		StringBuilder files = new StringBuilder();
+		for (final File fileEntry : folder.listFiles()) {
+			files.append(fileEntry.getName() + ":");
+		}
+		return files.toString().split(":");
+	}
+
 	public static void main(String args[]) throws Exception {
 		File file = new File(args[0]);
 		String filePath = args[0];
@@ -80,13 +88,5 @@ public class VMtranslator {
 			}
 		}
 		writer.close();
-	}
-
-	public static String[] listFiles(final File folder) {
-		StringBuilder files = new StringBuilder();
-		for (final File fileEntry : folder.listFiles()) {
-			files.append(fileEntry.getName() + ":");
-		}
-		return files.toString().split(":");
 	}
 }

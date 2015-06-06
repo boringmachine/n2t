@@ -2,17 +2,6 @@ package Assembler;
 
 public class Code {
 
-	static int dest(String str) {
-		int d = 0x0;
-		if (str.contains("M"))
-			d |= 0x1;
-		if (str.contains("D"))
-			d |= 0x2;
-		if (str.contains("A"))
-			d |= 0x4;
-		return d << 3;
-	}
-
 	static int comp(String str) {
 		int c = 0x0;
 
@@ -60,6 +49,17 @@ public class Code {
 
 		return c << 6;
 
+	}
+
+	static int dest(String str) {
+		int d = 0x0;
+		if (str.contains("M"))
+			d |= 0x1;
+		if (str.contains("D"))
+			d |= 0x2;
+		if (str.contains("A"))
+			d |= 0x4;
+		return d << 3;
 	}
 
 	static int jump(String str) {

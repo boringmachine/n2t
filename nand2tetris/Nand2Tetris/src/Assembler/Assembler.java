@@ -9,16 +9,23 @@ import java.util.ArrayList;
 
 public class Assembler {
 
-	private File file;
-	private FileOutputStream out;
-	private OutputStreamWriter writer;
-	private Parser parser;
-	private SymbolTable table;
-	private int finalAddress;
+	public static void main(String argv[]) throws IOException {
+		Assembler asm = new Assembler(argv[0], "tmp.bin");
+		asm.createSymbolTable();
+		asm.writeCode();
+
+	}
+	private int counter = 0;
 	private ByteBuffer data;
+	private File file;
+	private int finalAddress;
 	private int index = 0;
 	private String infile;
-	private int counter = 0;
+	private FileOutputStream out;
+	private Parser parser;
+	private SymbolTable table;
+
+	private OutputStreamWriter writer;
 
 	Assembler(String infile, String outfile) throws IOException {
 		this.infile = infile;
@@ -30,18 +37,18 @@ public class Assembler {
 		finalAddress = 0x10;
 	}
 
+	byte[] aCommand(String symbol) {
+		byte[] bytes = ByteBuffer.allocate(4)
+				.putInt(0x7FFF & table.getAddress(symbol)).array();
+		byte[] code = { bytes[2], bytes[3] };
+		return code;
+	}
+
 	byte[] cCommand(String dest, String comp, String jump) {
 		byte[] bytes = ByteBuffer
 				.allocate(4)
 				.putInt(0xE000 | Code.dest(dest) | Code.comp(comp)
 						| Code.jump(jump)).array();
-		byte[] code = { bytes[2], bytes[3] };
-		return code;
-	}
-
-	byte[] aCommand(String symbol) {
-		byte[] bytes = ByteBuffer.allocate(4)
-				.putInt(0x7FFF & table.getAddress(symbol)).array();
 		byte[] code = { bytes[2], bytes[3] };
 		return code;
 	}
@@ -107,12 +114,5 @@ public class Assembler {
 
 		out.write(codes);
 		out.close();
-	}
-
-	public static void main(String argv[]) throws IOException {
-		Assembler asm = new Assembler(argv[0], "tmp.bin");
-		asm.createSymbolTable();
-		asm.writeCode();
-
 	}
 }

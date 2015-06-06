@@ -9,12 +9,16 @@ import java.io.OutputStreamWriter;
 
 public class CompilationEngine {
 
-	JackTokenizer tokenizer;
+	public static void main(String[] argv) throws Exception{
+		CompilationEngine c = new CompilationEngine("sample/Square/Main.jack", "sample/Square/test.xml");
+	}
 	private File file;
 	private FileOutputStream out;
-	private OutputStreamWriter writer;
 	private int tabCounter;
+	JackTokenizer tokenizer;
 
+	
+	private OutputStreamWriter writer;
 	
 	CompilationEngine(String infile, String outfile) throws Exception{
 		tokenizer = new JackTokenizer(infile);
@@ -26,6 +30,10 @@ public class CompilationEngine {
 		if(isCorrectToken(TokenType.KEYWORD) &&  isCorrectKeyword(KeyWord.CLASS)){
 			compileClass();
 		}
+		writer.close();
+	}
+	
+	void close() throws IOException{
 		writer.close();
 	}
 	
@@ -41,13 +49,13 @@ public class CompilationEngine {
 		tokenizer.advance();
 		writeSymbol('{');
 		
-		while(tokenizer.advance().matches("static|field")){
+		while(tokenizer.advance().matches("^(static|field)$")){
 			compileClassVarDec();
 		}
 		
 		do{
 			compileSubroutineDec();
-		}while(tokenizer.advance().matches("constructor|function|method"));
+		}while(tokenizer.advance().matches("^(constructor|function|method)$"));
 		
 		writeSymbol('}');
 		
@@ -55,86 +63,68 @@ public class CompilationEngine {
 		write("</class>");
 	}
 	
-	void compileSubroutineDec() throws Exception{
-		write("<subroutineDec>");
+	void compileClassVarDec() throws Exception{
+		write("<classVarDec>");
+		int tmp = tabCounter++;
+		compileStatements();
+		tabCounter = tmp;
+		write("</classVarDec>");
+	}
+	
+	boolean compileDo() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.DO;
+		if(flag){
+			write("<doStatement>");
+			int tmp = tabCounter++;
+			writeKeyword();
+			tokenizer.advance();
+			
+			compileSubroutine();
+			
+			tokenizer.advance();
+			writeSymbol(';');
+			tabCounter = tmp;
+			write("</doStatement>");
+		}
+		
+		return flag;
+	}
+	
+	void compileExpression() throws Exception{
+		write("<expression>");
 		int tmp = tabCounter++;
 		
-		writeConstOrFuncOrMethod();
-		
+		compileTerm();
 		tokenizer.advance();
-		writeVoidOrType();
 		
-		tokenizer.advance();
-		writeIdentifier();
-		
-		tokenizer.advance();
-		writeSymbol('(');
-		
-		tokenizer.advance();
-		compileParameterList();
-		
-		writeSymbol(')');
-				
-		tokenizer.advance();
-		compileSubroutineBody();
-		
-		tabCounter=tmp;
-		write("</subroutineDec>");
-
-	}
-	
-	void compileParameterList() throws Exception{
-		write("<parameterList>");
-		if(!(tokenizer.symbol() == ')')){
-			int tmp = tabCounter++;
-			writeTypeAndIdentifier();
-		
-			while(writeComma()){
-				tokenizer.advance();
-				writeTypeAndIdentifier();
-				tokenizer.advance();
-			}
-			tabCounter = tmp;
-		}
-		write("</parameterList>");
-
-	}
-	
-	private void writeTypeAndIdentifier() throws Exception{
-		writeType();
-		tokenizer.advance();
-		writeIdentifier();
-	}
-	
-	boolean writeComma() throws Exception{
-			writeSymbol(',');
-			return tokenizer.symbol() == ',';
-	}
-	
-	boolean compileLet() throws Exception{
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.LET;
-		if(flag){
-			writeKeyword();
-			
+		while(writeOp()){
 			tokenizer.advance();
-			writeIdentifier();
+			compileTerm();
 			tokenizer.advance();
-			
-			if(writeSymbol('[')){
-				tokenizer.advance();
-				compileExpression();
-				writeSymbol(']');
-				tokenizer.advance();
-			}
-			
-			writeSymbol(';');
 		}
-		return flag;
+
+		tabCounter = tmp;
+		write("</expression>");
+	}
+	
+	void compileExpressionList() throws Exception{
+		write("<expressionList>");
+		int tmp = tabCounter++;
+
+		compileExpression();
+		while(writeComma()){
+			compileExpression();
+		}
+		
+		tabCounter = tmp;
+		write("</expressionList>");
 	}
 	
 	boolean compileIf() throws Exception{
 		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.IF;
 		if(flag){
+			write("<ifStatement>");
+			int tmp = tabCounter++;
 			writeKeyword();
 			
 			tokenizer.advance();
@@ -166,11 +156,214 @@ public class CompilationEngine {
 				
 				tokenizer.advance();
 				writeSymbol('}');
+				
+				tabCounter = tmp;
+				write("</ifStatement>");
 			};
 		}
 		
 		return flag;
 	}
+	
+	boolean compileLet() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.LET;
+		if(flag){
+			write("<letStatement>");
+			int tmp = tabCounter++;
+			
+			writeKeyword();
+			
+			tokenizer.advance();
+			writeIdentifier();
+			tokenizer.advance();
+			
+			if(writeSymbol('[')){
+				tokenizer.advance();
+				compileExpression();
+				writeSymbol(']');
+				tokenizer.advance();
+			}
+			writeSymbol('=');
+			
+			tokenizer.advance();
+			compileExpression();
+			
+			writeSymbol(';');
+			
+			tabCounter = tmp;
+			write("</letStatement>");
+
+		}
+		return flag;
+	}
+	
+	void compileParameterList() throws Exception{
+		write("<parameterList>");
+		if(!(tokenizer.symbol() == ')')){
+			int tmp = tabCounter++;
+			writeTypeAndIdentifier();
+		
+			while(writeComma()){
+				tokenizer.advance();
+				writeTypeAndIdentifier();
+				tokenizer.advance();
+			}
+			tabCounter = tmp;
+		}
+		write("</parameterList>");
+
+	}
+	
+	boolean compileReturn() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.RETURN;
+		if(flag){
+			write("<returnStatement>");
+			int tmp = tabCounter++;
+
+			writeKeyword();
+			tokenizer.advance();
+
+			if(!writeSymbol(';')){
+				compileExpression();
+				writeSymbol(';');
+			}
+			tabCounter = tmp;
+			write("</returnStatements>");
+		}
+		return flag;
+		
+	}
+	
+	
+	
+	boolean compileStatement() throws Exception{
+		return compileLet() || compileIf() || compileWhile() || compileDo() || compileReturn();
+	}
+	void compileStatements() throws Exception{
+		write("<statements>");
+		int tmp = tabCounter++;
+
+		while(compileStatement()){
+			tokenizer.advance();
+		};
+		
+		tabCounter = tmp;
+		write("</statements>");
+	};
+	
+	void compileSubroutine() throws Exception{
+		if(writeIdentifier()){
+			tokenizer.advance();
+		}
+		if(writeSymbol('.')){
+			tokenizer.advance();
+			writeIdentifier();
+			tokenizer.advance();
+		}
+		
+		writeSymbol('(');
+		tokenizer.advance();
+		
+		if(!writeSymbol(')')){
+			compileExpressionList();
+			writeSymbol(')');
+		}
+	}
+	
+	void compileSubroutineBody() throws Exception{
+		write("<subroutineBody>");
+		int tmp = tabCounter++;
+
+		writeSymbol('{');
+		tokenizer.advance();
+
+		compileVarDec();
+		
+		tokenizer.advance();
+		compileStatements();
+		
+		tokenizer.advance();
+		writeSymbol('}');
+		tabCounter = tmp;
+		write("</subroutineBody>");
+	}
+	void compileSubroutineDec() throws Exception{
+		write("<subroutineDec>");
+		int tmp = tabCounter++;
+		
+		writeConstOrFuncOrMethod();
+		
+		tokenizer.advance();
+		writeVoidOrType();
+		
+		tokenizer.advance();
+		writeIdentifier();
+		
+		tokenizer.advance();
+		writeSymbol('(');
+		
+		tokenizer.advance();
+		compileParameterList();
+		
+		writeSymbol(')');
+				
+		tokenizer.advance();
+		compileSubroutineBody();
+		
+		tabCounter=tmp;
+		write("</subroutineDec>");
+
+	}
+	
+	
+	void compileTerm() throws Exception{
+		write("<term>");
+		int tmp = tabCounter++;
+		boolean flag = writeIdentifier();
+		if(writeIntConst() || writeStringConst() || writeKeywordConst() || flag){
+			if(flag){
+				tokenizer.advance();
+				if(writeSymbol('[')){
+					tokenizer.advance();
+					compileExpression();
+					tokenizer.advance();
+					writeSymbol(']');
+				} else if(writeSymbol('(')){
+					tokenizer.advance();
+					compileExpression();
+					tokenizer.advance();
+					writeSymbol(')');
+				} else if(writeUnaryOp()){
+					compileTerm();
+				} else {
+					compileSubroutine();
+				}
+
+			}
+		}
+		tabCounter = tmp;
+		write("</term>");
+	};
+	
+	void compileVarDec() throws Exception{
+		write("<varDec>");
+		int tmp = tabCounter++;
+		if(writeVar()){
+			tokenizer.advance();
+			writeTypeAndIdentifier();
+			while(writeComma()){
+				tokenizer.advance();
+				writeTypeAndIdentifier();
+				tokenizer.advance();
+				if(writeSymbol(';')) return;
+			}
+			tokenizer.advance();
+			writeSymbol(';');
+
+		}
+		tabCounter = tmp;
+		write("</varDec>");
+	};
 	
 	boolean compileWhile() throws Exception{
 		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.WHILE;
@@ -200,179 +393,88 @@ public class CompilationEngine {
 
 	}
 	
-	boolean compileDo() throws Exception{
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.DO;
-		if(flag){
-			writeKeyword();
-			tokenizer.advance();
-			
-			compileSubroutine();
-			
-			tokenizer.advance();
-			writeSymbol(';');
+	private boolean isCorrectKeyword(KeyWord k){
+		return tokenizer.keyWord() == k;
+	}
+	
+	private boolean isCorrectSymbol(char s) throws Exception{
+		return isCorrectToken(TokenType.SYMBOL) && (tokenizer.symbol() == s);
+	}
+	
+	private boolean isCorrectToken(TokenType t) throws Exception{
+		return tokenizer.tokenType() == t;
+	}
+	
+	private boolean isType() throws Exception{
+		return (isCorrectKeyword(KeyWord.BOOLEAN)|| isCorrectKeyword(KeyWord.CHAR)||isCorrectKeyword(KeyWord.INT)||isCorrectToken(TokenType.IDENTIFIER));
+	}
+	
+	private void write(String line) throws IOException{
+		for(int i=0;i<tabCounter;i++){
+			writer.write("\t");
 		}
-		
-		return flag;
+		writer.write(line + "\n");
 	}
 	
-	boolean compileReturn() throws Exception{
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.RETURN;
-		if(flag){
-			writeKeyword();
-			tokenizer.advance();
-
-			compileExpression();
-			writeSymbol(';');
-		}
-		return flag;
-		
+	private boolean writeComma() throws Exception{
+			writeSymbol(',');
+			return tokenizer.symbol() == ',';
 	}
 	
-	void compileSubroutine() throws Exception{
-		writeIdentifier();
-		
-		tokenizer.advance();
-		if(writeSymbol('.')){
-			tokenizer.advance();
-			writeIdentifier();
-			tokenizer.advance();
-		}
-		
-		writeSymbol('(');
-		
-		tokenizer.advance();
-		compileExpressionList();
-		
-		writeSymbol(')');
-	}
-	
-	
-	
-	void compileExpression() throws Exception{
-		
-		if(compileTerm()){
-			tokenizer.advance();
-		
-			while(compileOp()){
-				tokenizer.advance();
-				compileTerm();
-				tokenizer.advance();
-			}
-		}	
-	}
-	void compileExpressionList() throws Exception{
-		compileExpression();
-		while(writeComma()){
-			compileExpression();
-		}
-	};
-	
-	boolean compileOp() throws Exception{
-		boolean flag = tokenizer.tokenType() == TokenType.SYMBOL;
-		String s = ""+tokenizer.symbol();
-		if((flag = (flag && s.matches("^(+|-|\\*|/|&|\\||<|>|=|~)$"))) && writeSymbol(s.charAt(0)));
-		return flag;
-	}
-	boolean compileTerm(){return true;}
-	void compileSubroutineBody() throws Exception{
-		write("<subroutineBody>");
-		int tmp = tabCounter++;
-
-		writeSymbol('{');
-		tokenizer.advance();
-
-		compileVarDec();
-		
-		compileStatements();
-		
-		tokenizer.advance();
-		writeSymbol('}');
-		tabCounter = tmp;
-		write("</subroutineBody>");
-	};
-	
-	void compileVarDec() throws Exception{
-		write("<varDec>");
-		int tmp = tabCounter++;
-		if(writeVar()){
-			tokenizer.advance();
-			writeTypeAndIdentifier();
-			while(writeComma()){
-				tokenizer.advance();
-				writeTypeAndIdentifier();
-				tokenizer.advance();
-			}
-		}
-		writeSymbol(';');
-		tabCounter = tmp;
-		write("</varDec>");
-	};
-	
-	private boolean writeVar() throws Exception{
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == KeyWord.VAR;
-		if(flag){
-			writeKeyword();
-		}
-		return flag;
-	}
-	
-	private void writeType() throws IOException{
-		if(isType()){
-			writeKeyword();
-		}
-	}
-	
-	private boolean isType(){
-		return (isCorrectKeyword(KeyWord.BOOLEAN)|| isCorrectKeyword(KeyWord.CHAR)||isCorrectKeyword(KeyWord.INT));
-	}
 	
 	private void writeConstOrFuncOrMethod() throws IOException, Exception{
-		if(isCorrectToken(TokenType.KEYWORD) && 
-				(isCorrectKeyword(KeyWord.FUNCTION)||isCorrectKeyword(KeyWord.CONSTRUCTOR) ||(isCorrectKeyword(KeyWord.METHOD) ))){
+		if(isCorrectKeyword(KeyWord.FUNCTION)||isCorrectKeyword(KeyWord.CONSTRUCTOR) ||(isCorrectKeyword(KeyWord.METHOD) )){
 			writeKeyword();
 		}
-	}
-	
-	private void writeVoidOrType() throws IOException, Exception{
-		if(isCorrectToken(TokenType.KEYWORD) &&
-				(isCorrectKeyword(KeyWord.VOID)||isCorrectKeyword(KeyWord.BOOLEAN)||
-						isCorrectKeyword(KeyWord.CHAR)||isCorrectKeyword(KeyWord.INT))){
-			writeKeyword();
-		}
-	}
-	
-	void compileClassVarDec() throws Exception{
-		int tmp = tabCounter++;
-		write("<classVarDec>");
-		compileStatements();
-		tabCounter = tmp;
-		write("</classVarDec>");
-	}
-	
-	boolean compileStatement() throws Exception{
-		return compileLet() || compileIf() || compileWhile() || compileDo() || compileReturn();
-	}
-	
-	
-	void compileStatements() throws Exception{
-		while(compileStatement()){
-			tokenizer.advance();
-		};
-	};
+	};	
 
-	private void writeIntConst() throws IOException{
-		write("<integerConstant>"+tokenizer.intVal()+"</integerConstant>");
-	}
 	
-	private void writeStringConst() throws IOException{
-		write("<stringConstant>"+tokenizer.intVal()+"</stringConstant>");
-	}
-	
-	
-	private void writeIdentifier() throws Exception{
-		if(isCorrectToken(TokenType.IDENTIFIER)){
+	private boolean writeIdentifier() throws Exception{
+		boolean flag;
+		if(flag = isCorrectToken(TokenType.IDENTIFIER)){
 			write("<identifier>"+tokenizer.identifier()+"</identifier>");
 		}
+		return flag;
+	}
+	
+	private boolean writeIntConst() throws Exception{
+		boolean flag = isCorrectToken(TokenType.INT_CONST);
+		if(flag){
+			write("<integerConstant>"+tokenizer.intVal()+"</integerConstant>");
+		}
+		return flag;
+	}
+	
+	private boolean writeKeyword() throws Exception{
+		boolean flag;
+		if(flag = isCorrectToken(TokenType.KEYWORD)){
+			write("<keyword>"+tokenizer.getKeyword()+"</keyword>");
+		}
+		return flag;
+	}
+	
+	private boolean writeKeywordConst() throws Exception{
+		KeyWord k = tokenizer.keyWord();
+		boolean flag = k==KeyWord.THIS || k==KeyWord.TRUE || k==KeyWord.FALSE || k==KeyWord.NULL;
+		if(flag){
+			writeKeyword();
+		}
+		return flag;
+	}
+	
+	private boolean writeOp() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.SYMBOL;
+		String s = ""+tokenizer.symbol();
+		if((flag = (flag && s.matches("^(\\+|-|\\*|/|&|\\||<|>|=)$"))) && writeSymbol(s.charAt(0)));
+		return flag;
+	}
+	
+	private boolean writeStringConst() throws Exception{
+		boolean flag = isCorrectToken(TokenType.STRING_CONST);
+		if(flag){
+			write("<stringConstant>"+tokenizer.intVal()+"</stringConstant>");
+		}
+		return flag;
 	}
 	
 	private boolean writeSymbol(char s) throws Exception{
@@ -383,36 +485,37 @@ public class CompilationEngine {
 		return flag;
 	}
 	
-	private void writeKeyword() throws IOException{
-		write("<keyword>"+tokenizer.getKeyword()+"</keyword>");
-	}
-	
-	private boolean isCorrectToken(TokenType t) throws Exception{
-		return tokenizer.tokenType() == t;
-	}
-	
-	private boolean isCorrectSymbol(char s) throws Exception{
-		return (tokenizer.tokenType() == TokenType.SYMBOL) && (tokenizer.symbol() == s);
-	}
-	
-	private boolean isCorrectKeyword(KeyWord k){
-		return tokenizer.keyWord() == k;
-	}
-	
-	
-	void write(String line) throws IOException{
-		for(int i=0;i<tabCounter;i++){
-			writer.write("\t");
+	private void writeType() throws Exception{
+		if(isType()){
+			if(writeKeyword() || writeIdentifier()){};
 		}
-		writer.write(line + "\n");
 	}
 	
-	void close() throws IOException{
-		writer.close();
+	private void writeTypeAndIdentifier() throws Exception{
+		writeType();
+		tokenizer.advance();
+		writeIdentifier();
 	}
 	
-	public static void main(String[] argv) throws Exception{
-		CompilationEngine c = new CompilationEngine("sample/Square/Main.jack", "sample/Square/test.xml");
+	private boolean writeUnaryOp() throws Exception{
+		boolean flag = tokenizer.tokenType() == TokenType.SYMBOL;
+		String s = ""+tokenizer.symbol();
+		if((flag = (flag && s.matches("^(-|~)$"))) && writeSymbol(s.charAt(0)));
+		return flag;
+	}
+	
+	private boolean writeVar() throws Exception{
+		boolean flag = tokenizer.keyWord() == KeyWord.VAR;
+		if(flag){
+			writeKeyword();
+		}
+		return flag;
+	}
+	
+	private void writeVoidOrType() throws IOException, Exception{
+		if(isCorrectKeyword(KeyWord.VOID)||isCorrectKeyword(KeyWord.BOOLEAN)|| isCorrectKeyword(KeyWord.CHAR)||isCorrectKeyword(KeyWord.INT)){
+			writeKeyword();
+		}
 	}
 }
 

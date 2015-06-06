@@ -12,16 +12,31 @@ import VMtranslator.Parser;
 
 public class JackTokenizer {
 
+	//check token
+	public static void main(String[] argv) throws IOException{
+		JackTokenizer a = new JackTokenizer("sample/Square/SquareGame.jack");
+		System.out.println(a.data);
+		while (a.hasMoreTokens()) {
+			System.out.println("TOKEN      :" + a.advance());
+			System.out.println("SYMBOL     :" + a.symbol);
+			System.out.println("IDENTIFIER :" + a.identifier);
+			System.out.println("KEYWORD    :" + a.keyword);
+			System.out.println("INTCONST   :" + a.integerConstant);
+			System.out.println("STRINGCONST:" + a.stringConstant);
+			System.out.println();
+		}
+	}
+	private String data;
 	private File file;
+	private String identifier;
 	private FileInputStream in;
+	private String integerConstant;
+	private String keyword;
 	private InputStreamReader reader;
 	private Scanner scan;
-	private String data;
-	private String symbol;
-	private String identifier;
-	private String keyword;
-	private String integerConstant;
 	private String stringConstant;
+	
+	private String symbol;
 	
 	JackTokenizer(String filename) throws IOException{
 		this.file = new File(filename);
@@ -43,45 +58,49 @@ public class JackTokenizer {
 		scan = new Scanner(this.data);
 	}
 	
-	boolean hasMoreTokens(){
-		return scan.hasNext();
-	}
-	
-	String advance() {
-		String str = scan.next();
-		symbol = "";
-		keyword = "";
-		identifier = "";
-		integerConstant = "";
-		stringConstant = "";
-		if(str.matches("^(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)$")){
-			symbol = str;
-		} else if(str.matches("class|constructor|function|method|field|static|void|var|true|false|null|this|let|do|if|else|while|return")){
-			keyword = str;
-		} else if(str.matches("\\p{Alpha}(\\p{Alnum}|_)*")){
-			identifier = str;
-		} else if(str.matches("[0-9]+")){
-			integerConstant = str;
-		} else if(str.matches("\".*\"?")){
-			str = str.replaceAll("\"", "");
-			stringConstant = str;
+	String advance() throws IOException {
+		String str = "";
+		try{
+			str = scan.next();
+			symbol = "";
+			keyword = "";
+			identifier = "";
+			integerConstant = "";
+			stringConstant = "";
+			if(str.matches("^(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)$")){
+				symbol = str;
+			} else if(str.matches("class|constructor|function|method|field|static|void|var|true|false|null|this|let|do|if|else|while|return")){
+				keyword = str;
+			} else if(str.matches("\\p{Alpha}(\\p{Alnum}|_)*")){
+				identifier = str;
+			} else if(str.matches("[0-9]+")){
+				integerConstant = str;
+			} else if(str.matches("\".*\"?")){
+				str = str.replaceAll("\"", "");
+				stringConstant = str;
+			}
+		} catch(NoSuchElementException e){
+			reader.close();
+			in.close();
 		}
 		return str;
 	}
 	
-	TokenType tokenType() throws Exception{
-		if(!symbol.isEmpty()){
-			return TokenType.SYMBOL;
-		} else if(!keyword.isEmpty()){
-			return TokenType.KEYWORD;
-		} else if(!identifier.isEmpty()){
-			return TokenType.IDENTIFIER;
-		} else if(!integerConstant.isEmpty()){
-			return TokenType.INT_CONST;
-		} else if(!stringConstant.isEmpty()){
-			return TokenType.STRING_CONST;
-		}
-		return null;
+	
+	String getKeyword(){
+		return keyword;
+	}
+	
+	boolean hasMoreTokens(){
+		return scan.hasNext();
+	}
+	
+	String identifier(){
+		return identifier;
+	}
+	
+	String intVal(){
+		return integerConstant;
 	}
 	
 	KeyWord keyWord(){
@@ -131,38 +150,30 @@ public class JackTokenizer {
 		return null;
 	}
 	
-	char symbol(){
-		return symbol.charAt(0);
-	}
-	
-	String identifier(){
-		return identifier;
-	}
-	
-	String intVal(){
-		return integerConstant;
-	}
-	
 	String stringVal(){
 		return stringConstant;
 	}
 	
-	String getKeyword(){
-		return keyword;
+	char symbol(){
+		if(!symbol.isEmpty()){
+			return symbol.charAt(0);
+		}else{
+			return ' ';
+		}
 	}
 	
-	//check token
-	public static void main(String[] argv) throws IOException{
-		JackTokenizer a = new JackTokenizer("sample/Square/SquareGame.jack");
-		System.out.println(a.data);
-		while (a.hasMoreTokens()) {
-			System.out.println("TOKEN      :" + a.advance());
-			System.out.println("SYMBOL     :" + a.symbol);
-			System.out.println("IDENTIFIER :" + a.identifier);
-			System.out.println("KEYWORD    :" + a.keyword);
-			System.out.println("INTCONST   :" + a.integerConstant);
-			System.out.println("STRINGCONST:" + a.stringConstant);
-			System.out.println();
+	TokenType tokenType() throws Exception{
+		if(!symbol.isEmpty()){
+			return TokenType.SYMBOL;
+		} else if(!keyword.isEmpty()){
+			return TokenType.KEYWORD;
+		} else if(!identifier.isEmpty()){
+			return TokenType.IDENTIFIER;
+		} else if(!integerConstant.isEmpty()){
+			return TokenType.INT_CONST;
+		} else if(!stringConstant.isEmpty()){
+			return TokenType.STRING_CONST;
 		}
+		return null;
 	}
 }
