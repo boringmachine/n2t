@@ -69,60 +69,12 @@
                 <expression>
                   <term>
                     <identifier>length</identifier>
-                    <expressionList>
-                      <expression>
-                        <term>
-                        </term>
-                      </expression>
-                    </expressionList>
                   </term>
                 </expression>
               </expressionList>
             </term>
-            <symbol>=</symbol>
-            <term>
-              <integerConstant>0</integerConstant>
-            </term>
           </expression>
-          <symbol>;</symbol>
         </letStatement>
-        <keyword>while</keyword>
-        <symbol>(</symbol>
-        <expression>
-          <term>
-            <identifier>i</identifier>
-            <expressionList>
-              <expression>
-                <term>
-                  <identifier>length</identifier>
-                  <expressionList>
-                    <expression>
-                      <term>
-                      </term>
-                    </expression>
-                  </expressionList>
-                </term>
-              </expression>
-            </expressionList>
-          </term>
-          <symbol>=</symbol>
-          <term>
-            <identifier>Keyboard</identifier>
-            <symbol>.</symbol>
-            <identifier>readInt</identifier>
-            <symbol>(</symbol>
-            <expressionList>
-              <expression>
-                <term>
-                  <stringConstant>ENTERTHENEXTNUMBER:</stringConstant>
-                </term>
-              </expression>
-            </expressionList>
-            <symbol>)</symbol>
-          </term>
-        </expression>
-        <statements>
-        </statements>
       </statements>
     </subroutineBody>
   </subroutineDec>

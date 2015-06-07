@@ -191,7 +191,7 @@ public class CompilationEngine {
 
 			tokenizer.advance();
 			compileExpression();
-
+			
 			writeSymbol(';');
 
 			tabCounter = tmp;
@@ -258,6 +258,7 @@ public class CompilationEngine {
 	};
 
 	void compileSubroutine() throws Exception {
+			
 		if (writeIdentifier()) {
 			tokenizer.advance();
 		}
@@ -265,14 +266,15 @@ public class CompilationEngine {
 			tokenizer.advance();
 			writeIdentifier();
 			tokenizer.advance();
-		}
+		} 
 
-		writeSymbol('(');
-		tokenizer.advance();
+		if(writeSymbol('(')){
+			tokenizer.advance();
 
-		if (!writeSymbol(')')) {
-			compileExpressionList();
-			writeSymbol(')');
+			if (!writeSymbol(')')) {
+				compileExpressionList();
+				writeSymbol(')');
+			}
 		}
 	}
 
@@ -326,26 +328,30 @@ public class CompilationEngine {
 	void compileTerm() throws Exception {
 		write("<term>");
 		int tmp = tabCounter++;
-		boolean flag = false;
+		boolean flagA = false;
+		boolean flagB = false;
+		boolean flagC = false;
 		if (writeIntConst() || writeStringConst() || writeKeywordConst()
-				|| (flag = writeIdentifier())) {
-			if (flag) {
+				|| (flagA = writeIdentifier()) || (flagB =writeUnaryOp()) 
+				|| (flagC = writeSymbol('('))) {
+			if (flagA) {
 				tokenizer.advance();
 				if (writeSymbol('[')) {
 					tokenizer.advance();
 					compileExpression();
 					writeSymbol(']');
-				} else if (writeSymbol('(')) {
-					tokenizer.advance();
-					compileExpression();
-					writeSymbol(')');
-				} else if (writeUnaryOp()) {
-					compileTerm();
 				} else {
 					compileSubroutine();
 				}
-
+			} else if(flagB){
+				tokenizer.advance();
+				compileTerm();
+			} else if(flagC){ 
+				tokenizer.advance();
+				compileExpression();
+				writeSymbol(')');
 			}
+
 		}
 		tabCounter = tmp;
 		write("</term>");
@@ -479,9 +485,9 @@ public class CompilationEngine {
 	private boolean writeOp() throws Exception {
 		boolean flag = tokenizer.tokenType() == TokenType.SYMBOL;
 		String s = "" + tokenizer.symbol();
-		if ((flag = (flag && s.matches("^(\\+|-|\\*|/|&|\\||<|>|=)$")))
-				&& writeSymbol(s.charAt(0)))
-			;
+		if ((flag = (flag && s.matches("^(\\+|-|\\*|/|&|\\||<|>|=)$")))){
+			writeSymbol(s.charAt(0));
+		}
 		return flag;
 	}
 

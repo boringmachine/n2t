@@ -54,7 +54,7 @@ public class JackTokenizer {
 				.replaceAll(">", "&gt;").replaceAll("&", "&amp;");
 		reader = new InputStreamReader(new ByteArrayInputStream(
 				this.data.getBytes("UTF-8")));
-		System.out.println(this.data);
+		//System.out.println(this.data);
 		scan = new Scanner(this.data);
 	}
 
