@@ -12,7 +12,7 @@ def split_str(s, n):
     length = len(s)
     return [s[i:i+n] for i in range(0, length, n)]
 
-parsed = ''.join(bin(int(c, 16))[2:].zfill(4) for c in code2)
+parsed = "".join(bin(int(c, 16))[2:].zfill(4) for c in code2)
 parsed2 = split_str(parsed, 16)
 for p in parsed2:
     g.write(p+"\n")    

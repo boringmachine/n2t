@@ -27,522 +27,291 @@ public class CompilationEngine {
 		writer = new OutputStreamWriter(out);
 		tabCounter = 0;
 		tokenizer.advance();
-		if (isCorrectToken(TokenType.KEYWORD)
-				&& isCorrectKeyword(KeyWord.CLASS)) {
-			compileClass();
-		}
+		compileClass();
 		writer.close();
 	}
 
 	void close() throws IOException {
 		writer.close();
 	}
-
-	void compileClass() throws Exception {
-		write("<class>");
-
-		tabCounter++;
-		writeKeyword();
-
-		tokenizer.advance();
-		writeIdentifier();
-
-		tokenizer.advance();
-		writeSymbol('{');
-
-		while (tokenizer.advance().matches("^(static|field)$")) {
-			compileClassVarDec();
-		}
-
-		do {
-			compileSubroutineDec();
-		} while (tokenizer.advance().matches("^(constructor|function|method)$"));
-
-		writeSymbol('}');
-
-		tabCounter = 0;
-		write("</class>");
-	}
-
-	void compileClassVarDec() throws Exception {
-		write("<classVarDec>");
+	
+	void compileClass() throws Exception{
+		writeTag("class");
 		int tmp = tabCounter++;
-		compileStatements();
+		
+		writeKeyword(KeyWord.CLASS, "");
+		writeClassName("before");
+		warning(writeSymbol("{", "before"), "warn: {");
+		while(compileClassVarDec("before"));
+		while(compileSubroutineDec());
+		warning(writeSymbol("}", ""), "warn: }");
+		
 		tabCounter = tmp;
-		write("</classVarDec>");
+		writeTag("/class");
 	}
-
-	boolean compileDo() throws Exception {
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD
-				&& tokenizer.keyWord() == KeyWord.DO;
-		if (flag) {
-			write("<doStatement>");
-			int tmp = tabCounter++;
-			writeKeyword();
+	
+	void warning(boolean sentence, String e) throws Exception{
+		if(!sentence){
+			throw new Exception(e);
+		}
+	}
+	
+	boolean compileClassVarDec(String advancePoint) throws Exception{
+		writeTag("classVarDec");
+		int tmp = tabCounter++;
+		
+		if(advancePoint.equals("before")){
 			tokenizer.advance();
-
-			compileSubroutine();
-
-			tokenizer.advance();
-			writeSymbol(';');
+		}
+		
+		boolean flag = false;
+		if(tokenizer.keyWord() == KeyWord.STATIC || tokenizer.keyWord() == KeyWord.FIELD){
+			warning(flag = writeKeyword(KeyWord.STATIC, "") || writeKeyword(KeyWord.FIELD, ""),
+					"warn: static|field");
+		
+			warning(writeType("before"), "warn: type is wrong.");
+			warning(writeVarName("before"), "warn: varName is wrong");
+		
+			while(writeSymbol(",", "before")){
+				writeVarName("before");
+			}
+		
+			writeSymbol(";", "");
+		
+			if(advancePoint.equals("after")){
+				tokenizer.advance();
+			}
+		
 			tabCounter = tmp;
-			write("</doStatement>");
+			writeTag("/classVarDec");
+		
 		}
+		return flag;
 
+	}
+	
+	
+	boolean writeType(String advancePosition) throws Exception{
+		if(advancePosition.equals("before")){
+			tokenizer.advance();
+		}
+		boolean flag = 
+				(tokenizer.tokenType() == TokenType.KEYWORD && 
+					(tokenizer.keyWord() == KeyWord.BOOLEAN 
+						|| tokenizer.keyWord() == KeyWord.INT
+						|| tokenizer.keyWord() == KeyWord.CHAR
+					)
+				) || (tokenizer.tokenType() == TokenType.IDENTIFIER);
+		if(flag){
+			writeKeyword(tokenizer.keyWord(), "");
+			writeIdentifier("");
+		}
 		return flag;
 	}
-
-	void compileExpression() throws Exception {
-		write("<expression>");
-		int tmp = tabCounter++;
-
-		compileTerm();
-		tokenizer.advance();
-
-		while (writeOp()) {
-			tokenizer.advance();
-			compileTerm();
-			tokenizer.advance();
-		}
-
-		tabCounter = tmp;
-		write("</expression>");
+	
+	boolean writeVarName(String advancePoint) throws Exception{
+		return writeIdentifier(advancePoint);
 	}
+	
+	boolean compileSubroutineDec() throws Exception{
 
-	void compileExpressionList() throws Exception {
-		write("<expressionList>");
-		int tmp = tabCounter++;
-
-		compileExpression();
-		while (writeComma()) {
-			compileExpression();
-		}
-
-		tabCounter = tmp;
-		write("</expressionList>");
-	}
-
-	boolean compileIf() throws Exception {
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD
-				&& tokenizer.keyWord() == KeyWord.IF;
-		if (flag) {
-			write("<ifStatement>");
+		boolean flag = 
+				   tokenizer.keyWord() == KeyWord.CONSTRUCTOR 
+				|| tokenizer.keyWord() == KeyWord.FUNCTION 
+				|| tokenizer.keyWord() == KeyWord.METHOD;
+		if(flag){
+			writeTag("subroutineDec");
 			int tmp = tabCounter++;
-			writeKeyword();
-
+			warning(
+			   writeKeyword(KeyWord.CONSTRUCTOR, "") || 
+			   writeKeyword(KeyWord.FUNCTION, "") || 
+			   writeKeyword(KeyWord.METHOD, ""), 
+			   "warn: missing constructor|function|method");
+		
 			tokenizer.advance();
-			writeSymbol('(');
-
-			tokenizer.advance();
-			compileExpression();
-
-			writeSymbol(')');
-
-			tokenizer.advance();
-			writeSymbol('{');
-
-			tokenizer.advance();
-			compileStatements();
-
-			tokenizer.advance();
-			writeSymbol('}');
-
-			if (tokenizer.advance().equals("else")) {
-				writeKeyword();
-
-				tokenizer.advance();
-				writeSymbol('{');
-
-				tokenizer.advance();
-				compileStatements();
-
-				tokenizer.advance();
-				writeSymbol('}');
-
-				tabCounter = tmp;
-				write("</ifStatement>");
-			}
-			;
-		}
-
-		return flag;
-	}
-
-	boolean compileLet() throws Exception {
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD
-				&& tokenizer.keyWord() == KeyWord.LET;
-		if (flag) {
-			write("<letStatement>");
-			int tmp = tabCounter++;
-
-			writeKeyword();
-
-			tokenizer.advance();
-			writeIdentifier();
-			tokenizer.advance();
-
-			if (writeSymbol('[')) {
-				tokenizer.advance();
-				compileExpression();
-				writeSymbol(']');
-				tokenizer.advance();
-			}
-			writeSymbol('=');
-
-			tokenizer.advance();
-			compileExpression();
+			warning(writeKeyword(KeyWord.VOID, "") || writeType(""), "warn: missing void|type");
+		
+			warning(writeSubroutineName("before"), "warn: wrong subroutineName");
+			warning(writeSymbol("(", "before"), "warn: missing (");
+			compileParameterList();
+			warning(writeSymbol(")", ""), "warn: missing )");
+			System.out.println("ho"+tokenizer.symbol());
+			compileSubroutineBody();
 			
-			writeSymbol(';');
-
 			tabCounter = tmp;
-			write("</letStatement>");
-
+			writeTag("/subroutineDec");
 		}
-		return flag;
-	}
-
-	void compileParameterList() throws Exception {
-		write("<parameterList>");
-		if (!(tokenizer.symbol() == ')')) {
-			int tmp = tabCounter++;
-			writeTypeAndIdentifier();
-
-			while (writeComma()) {
-				tokenizer.advance();
-				writeTypeAndIdentifier();
-				tokenizer.advance();
-			}
-			tabCounter = tmp;
-		}
-		write("</parameterList>");
-
-	}
-
-	boolean compileReturn() throws Exception {
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD
-				&& tokenizer.keyWord() == KeyWord.RETURN;
-		if (flag) {
-			write("<returnStatement>");
-			int tmp = tabCounter++;
-
-			writeKeyword();
-			tokenizer.advance();
-
-			if (!writeSymbol(';')) {
-				compileExpression();
-				writeSymbol(';');
-			}
-			tabCounter = tmp;
-			write("</returnStatements>");
-		}
-		return flag;
-
-	}
-
-	boolean compileStatement() throws Exception {
-		return compileLet() || compileIf() || compileWhile() || compileDo()
-				|| compileReturn();
-	}
-
-	void compileStatements() throws Exception {
-		write("<statements>");
-		int tmp = tabCounter++;
-
-		while (compileStatement()) {
-			tokenizer.advance();
-		}
-		;
-
-		tabCounter = tmp;
-		write("</statements>");
-	};
-
-	void compileSubroutine() throws Exception {
-			
-		if (writeIdentifier()) {
-			tokenizer.advance();
-		}
-		if (writeSymbol('.')) {
-			tokenizer.advance();
-			writeIdentifier();
-			tokenizer.advance();
-		} 
-
-		if(writeSymbol('(')){
-			tokenizer.advance();
-
-			if (!writeSymbol(')')) {
-				compileExpressionList();
-				writeSymbol(')');
-			}
-		}
-	}
-
-	void compileSubroutineBody() throws Exception {
-		write("<subroutineBody>");
-		int tmp = tabCounter++;
-
-		writeSymbol('{');
+		
 		tokenizer.advance();
-
-		while (tokenizer.keyWord() == KeyWord.VAR) {
-			compileVarDec();
-			tokenizer.advance();
-		}
+		
+		return flag;
+	}
+	
+	boolean compileSubroutineBody() throws Exception{
+		writeTag("subroutineBody");
+		int tmp = tabCounter++;
+		
+		tokenizer.advance();
+		warning(writeSymbol("{","after"), "warn: missing {");
+		while(compileVarDec());
 		compileStatements();
-
-		tokenizer.advance();
-		writeSymbol('}');
+		warning(writeSymbol("}", ""), "warn: missing }");
+		
 		tabCounter = tmp;
-		write("</subroutineBody>");
+		writeTag("/subroutineBody");
+		return true;
 	}
-
-	void compileSubroutineDec() throws Exception {
-		write("<subroutineDec>");
-		int tmp = tabCounter++;
-
-		writeConstOrFuncOrMethod();
-
-		tokenizer.advance();
-		writeVoidOrType();
-
-		tokenizer.advance();
-		writeIdentifier();
-
-		tokenizer.advance();
-		writeSymbol('(');
-
-		tokenizer.advance();
-		compileParameterList();
-
-		writeSymbol(')');
-
-		tokenizer.advance();
-		compileSubroutineBody();
-
-		tabCounter = tmp;
-		write("</subroutineDec>");
-
+	
+	boolean compileStatements() throws Exception{
+		return true;
 	}
-
-	void compileTerm() throws Exception {
-		write("<term>");
-		int tmp = tabCounter++;
-		boolean flagA = false;
-		boolean flagB = false;
-		boolean flagC = false;
-		if (writeIntConst() || writeStringConst() || writeKeywordConst()
-				|| (flagA = writeIdentifier()) || (flagB =writeUnaryOp()) 
-				|| (flagC = writeSymbol('('))) {
-			if (flagA) {
-				tokenizer.advance();
-				if (writeSymbol('[')) {
-					tokenizer.advance();
-					compileExpression();
-					writeSymbol(']');
-				} else {
-					compileSubroutine();
-				}
-			} else if(flagB){
-				tokenizer.advance();
-				compileTerm();
-			} else if(flagC){ 
-				tokenizer.advance();
-				compileExpression();
-				writeSymbol(')');
+	
+	boolean compileVarDec() throws Exception{
+		
+		boolean flag = tokenizer.keyWord() == KeyWord.VAR;
+		if(flag){
+			writeTag("varDec");
+			int tmp = tabCounter++;
+			
+			warning(writeKeyword(KeyWord.VAR, ""), "warn: missing var");
+			warning(writeType("before"), "warn: missing type");
+			warning(writeVarName("before"), "warn: missing varName");
+			while(writeSymbol(",", "before")){
+				writeVarName("before");
 			}
+			
+			tabCounter = tmp;
+			writeTag("/varDec");
+		}
+		
+		return flag;
+	}
+	
+	boolean compileParameterList() throws Exception{
+		writeTag("parameterList");
+		int tmp = tabCounter++;
+		
+		if(tokenizer.advance().equals(")")){
+			tabCounter = tmp;
+			writeTag("/parameterList");
+			return false;
+		}
+	
+		
+		warning(writeType(""), "warn: wrong type");
+		warning(writeVarName("before"), "warn: wrong varName");
+		
+		
+		while(writeSymbol(",", "before")){
+			warning(writeType("before"), "warn: wrong type");
+			warning(writeVarName("before"), "warn: wrong varName");
+		}
+		
+		tabCounter = tmp;
+		writeTag("/parameterList");
+		return true;
+	}
+	
+	
+	
+	boolean writeKeyword(KeyWord k, String advancePoint) throws Exception{
+		if(advancePoint.equals("before")){
+			tokenizer.advance();
+		}
+		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD && tokenizer.keyWord() == k;
+		if(flag){
+			String s = "";
+			switch(tokenizer.keyWord()){
+			case CLASS:
+				s = "class";
+				break;
+			case STATIC:
+				s = "static";
+				break;
+			case FIELD:
+				s = "field";
+				break;
+			case INT:
+				s = "int";
+				break;
+			case CHAR:
+				s = "char";
+				break;
+			case BOOLEAN:
+				s = "boolean";
+				break;
+			case CONSTRUCTOR:
+				s = "constructor";
+				break;
+			case FUNCTION:
+				s = "function";
+				break;
+			case METHOD:
+				s = "method";
+				break;
+			case VOID:
+				s = "void";
+				break;
+			case VAR:
+				s = "var";
+				break;
+			}
+			write("<keyword>"+s+"</keyword>");
 
 		}
-		tabCounter = tmp;
-		write("</term>");
-	};
-
-	void compileVarDec() throws Exception {
-		write("<varDec>");
-		int tmp = tabCounter++;
-		if (writeVar()) {
+		
+		
+		if(advancePoint.equals("after")){
 			tokenizer.advance();
-			writeTypeAndIdentifier();
-			tokenizer.advance();
-			while (writeComma()) {
-				tokenizer.advance();
-				writeIdentifier();
-				tokenizer.advance();
-				if (writeSymbol(';')) {
-					tabCounter = tmp;
-					write("</varDec>");
-					return;
-				}
-			}
-			writeSymbol(';');
-
-		}
-		tabCounter = tmp;
-		write("</varDec>");
-	};
-
-	boolean compileWhile() throws Exception {
-		boolean flag = tokenizer.tokenType() == TokenType.KEYWORD
-				&& tokenizer.keyWord() == KeyWord.WHILE;
-		if (flag) {
-			writeKeyword();
-
-			tokenizer.advance();
-			writeSymbol('(');
-
-			tokenizer.advance();
-			compileExpression();
-
-			writeSymbol(')');
-
-			tokenizer.advance();
-			writeSymbol('{');
-
-			tokenizer.advance();
-			compileStatements();
-
-			tokenizer.advance();
-			writeSymbol('}');
-
 		}
 		return flag;
-
+	}
+	
+	boolean writeClassName(String advancePoint) throws Exception{
+		return writeIdentifier(advancePoint);
+	}
+	
+	boolean writeSubroutineName(String advancePoint) throws Exception{
+		return writeIdentifier(advancePoint);
+	}
+	
+	boolean writeIdentifier(String advancePoint) throws Exception{
+		if(advancePoint.equals("before")){
+			tokenizer.advance();
+		}
+		boolean flag = tokenizer.tokenType() == TokenType.IDENTIFIER;
+		if(flag){
+			write("<identifier>"+tokenizer.identifier()+"</identifier>");
+		}
+		if(advancePoint.equals("after")){
+			tokenizer.advance();
+		}
+		return flag;
+	}
+	
+	
+	boolean writeSymbol(String s, String advancePoint) throws Exception{
+		if(advancePoint.equals("before")){
+			tokenizer.advance();
+		}
+		boolean flag = tokenizer.tokenType() == TokenType.SYMBOL && tokenizer.symbol().equals(s);
+		if(flag){
+			write("<symbol>"+s+"</symbol>");
+		}
+		if(advancePoint.equals("after")){
+			tokenizer.advance();
+		}
+		return flag;
 	}
 
-	private boolean isCorrectKeyword(KeyWord k) {
-		return tokenizer.keyWord() == k;
+	void writeTag(String s) throws Exception{
+		write("<"+s+">");
 	}
-
-	private boolean isCorrectSymbol(char s) throws Exception {
-		return isCorrectToken(TokenType.SYMBOL) && (tokenizer.symbol() == s);
-	}
-
-	private boolean isCorrectToken(TokenType t) throws Exception {
-		return tokenizer.tokenType() == t;
-	}
-
-	private boolean isType() throws Exception {
-		return (isCorrectKeyword(KeyWord.BOOLEAN)
-				|| isCorrectKeyword(KeyWord.CHAR)
-				|| isCorrectKeyword(KeyWord.INT) || isCorrectToken(TokenType.IDENTIFIER));
-	}
-
-	private void write(String line) throws IOException {
-		for (int i = 0; i < tabCounter; i++) {
+	
+	void write(String s) throws Exception{
+		for(int i=0; i<tabCounter; i++){
 			writer.write("  ");
 		}
-		writer.write(line + "\n");
-	}
-
-	private boolean writeComma() throws Exception {
-		writeSymbol(',');
-		return tokenizer.symbol() == ',';
-	}
-
-	private void writeConstOrFuncOrMethod() throws IOException, Exception {
-		if (isCorrectKeyword(KeyWord.FUNCTION)
-				|| isCorrectKeyword(KeyWord.CONSTRUCTOR)
-				|| (isCorrectKeyword(KeyWord.METHOD))) {
-			writeKeyword();
-		}
-	};
-
-	private boolean writeIdentifier() throws Exception {
-		boolean flag;
-		if (flag = isCorrectToken(TokenType.IDENTIFIER)) {
-			write("<identifier>" + tokenizer.identifier() + "</identifier>");
-		}
-		return flag;
-	}
-
-	private boolean writeIntConst() throws Exception {
-		boolean flag = isCorrectToken(TokenType.INT_CONST);
-		if (flag) {
-			write("<integerConstant>" + tokenizer.intVal()
-					+ "</integerConstant>");
-		}
-		return flag;
-	}
-
-	private boolean writeKeyword() throws Exception {
-		boolean flag;
-		if (flag = isCorrectToken(TokenType.KEYWORD)) {
-			write("<keyword>" + tokenizer.getKeyword() + "</keyword>");
-		}
-		return flag;
-	}
-
-	private boolean writeKeywordConst() throws Exception {
-		KeyWord k = tokenizer.keyWord();
-		boolean flag = k == KeyWord.THIS || k == KeyWord.TRUE
-				|| k == KeyWord.FALSE || k == KeyWord.NULL;
-		if (flag) {
-			writeKeyword();
-		}
-		return flag;
-	}
-
-	private boolean writeOp() throws Exception {
-		boolean flag = tokenizer.tokenType() == TokenType.SYMBOL;
-		String s = "" + tokenizer.symbol();
-		if ((flag = (flag && s.matches("^(\\+|-|\\*|/|&|\\||<|>|=)$")))){
-			writeSymbol(s.charAt(0));
-		}
-		return flag;
-	}
-
-	private boolean writeStringConst() throws Exception {
-		boolean flag = isCorrectToken(TokenType.STRING_CONST);
-		if (flag) {
-			write("<stringConstant>" + tokenizer.stringVal()
-					+ "</stringConstant>");
-		}
-		return flag;
-	}
-
-	private boolean writeSymbol(char s) throws Exception {
-		boolean flag = isCorrectSymbol(s);
-		if (flag) {
-			write("<symbol>" + tokenizer.symbol() + "</symbol>");
-		}
-		return flag;
-	}
-
-	private void writeType() throws Exception {
-		if (isType()) {
-			if (writeKeyword() || writeIdentifier()) {
-			}
-			;
-		}
-	}
-
-	private void writeTypeAndIdentifier() throws Exception {
-		writeType();
-		tokenizer.advance();
-		writeIdentifier();
-	}
-
-	private boolean writeUnaryOp() throws Exception {
-		boolean flag = tokenizer.tokenType() == TokenType.SYMBOL;
-		String s = "" + tokenizer.symbol();
-		if ((flag = (flag && s.matches("^(-|~)$"))) && writeSymbol(s.charAt(0)))
-			;
-		return flag;
-	}
-
-	private boolean writeVar() throws Exception {
-		boolean flag = tokenizer.keyWord() == KeyWord.VAR;
-		if (flag) {
-			writeKeyword();
-		}
-		return flag;
-	}
-
-	private void writeVoidOrType() throws IOException, Exception {
-		if (isCorrectKeyword(KeyWord.VOID) || isCorrectKeyword(KeyWord.BOOLEAN)
-				|| isCorrectKeyword(KeyWord.CHAR)
-				|| isCorrectKeyword(KeyWord.INT)) {
-			writeKeyword();
-		}
+		writer.write(s + "\n");
 	}
 }

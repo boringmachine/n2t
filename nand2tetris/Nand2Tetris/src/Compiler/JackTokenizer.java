@@ -49,9 +49,11 @@ public class JackTokenizer {
 				.replaceAll("(?://.*)|(/\\*(?:.|[\\n\\r])*?\\*/)", "")
 				.replaceAll("\n|\r|\n\r|\r\n", "")
 				.replaceAll(
-						"(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)",
-						" $1 ").replaceAll(" +", " ").replaceAll("<", "&lt;")
-				.replaceAll(">", "&gt;").replaceAll("&", "&amp;");
+						"(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~|\\[|\\])",
+						" $1 ").replaceAll(" +", " ")
+				.replaceAll("&","&amp;")
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;");
 		reader = new InputStreamReader(new ByteArrayInputStream(
 				this.data.getBytes("UTF-8")));
 		//System.out.println(this.data);
@@ -67,7 +69,7 @@ public class JackTokenizer {
 			identifier = "";
 			integerConstant = "";
 			stringConstant = "";
-			if (str.matches("^(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~)$")) {
+			if (str.matches("^(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&amp;|\\||&gt;|&lt;|=|~|\\[|\\])$")) {
 				symbol = str;
 			} else if (str
 					.matches("^(class|constructor|function|method|field|static|void|int|char|boolean|var|true|false|null|this|let|do|if|else|while|return)$")) {
@@ -157,12 +159,8 @@ public class JackTokenizer {
 		return stringConstant;
 	}
 
-	char symbol() {
-		if (!symbol.isEmpty()) {
-			return symbol.charAt(0);
-		} else {
-			return ' ';
-		}
+	String symbol() {
+		return this.symbol;
 	}
 
 	TokenType tokenType() throws Exception {
