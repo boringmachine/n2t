@@ -61,8 +61,6 @@ public class CompilationEngine {
 	}
 	
 	boolean compileClassVarDec(String advancePoint) throws Exception{
-		writeTag("classVarDec");
-		int tmp = tabCounter++;
 		
 		if(advancePoint.equals("before")){
 			tokenizer.advance();
@@ -70,6 +68,8 @@ public class CompilationEngine {
 		
 		boolean flag = false;
 		if(tokenizer.keyWord() == KeyWord.STATIC || tokenizer.keyWord() == KeyWord.FIELD){
+			writeTag("classVarDec");
+			int tmp = tabCounter++;
 			warning(flag = writeKeyword(KeyWord.STATIC, "") || writeKeyword(KeyWord.FIELD, ""),
 					"warn: static|field");
 		
@@ -139,7 +139,6 @@ public class CompilationEngine {
 			warning(writeSymbol("(", "before"), "warn: missing (");
 			compileParameterList();
 			warning(writeSymbol(")", ""), "warn: missing )");
-			System.out.println("ho"+tokenizer.symbol());
 			compileSubroutineBody();
 			
 			tabCounter = tmp;
@@ -159,7 +158,6 @@ public class CompilationEngine {
 		warning(writeSymbol("{", "after"), "warn: missing {");
 		while(compileVarDec());
 		compileStatements("");
-		System.out.println(tokenizer.symbol());
 		warning(writeSymbol("}", ""), "warn: missing }");
 		
 		tabCounter = tmp;
@@ -292,6 +290,7 @@ public class CompilationEngine {
 	}
 	
 	boolean compileExpression(String advancePoint) throws Exception{
+		
 		writeTag("expression");
 		int tmp = tabCounter++;
 		
@@ -300,11 +299,9 @@ public class CompilationEngine {
 		}
 		
 		compileTerm();
-		
 		while(writeOp()){
-			compileTerm();
+				compileTerm();
 		}
-		
 		tabCounter = tmp;
 		writeTag("/expression");
 		
@@ -312,6 +309,7 @@ public class CompilationEngine {
 	}
 	
 	boolean compileTerm() throws Exception{
+		
 		writeTag("term");
 		int tmp = tabCounter++;
 		
@@ -323,31 +321,34 @@ public class CompilationEngine {
 				||  (idenFlag = writeIdentifier("after"))
 				||  (leftFlag = writeSymbol("(", ""))
 				||  (unaryFlag = writeUnaryOp());
-		if(flag == true && (idenFlag||leftFlag||unaryFlag)==false){
-			tokenizer.advance();
-		}
-		else if(idenFlag){
-			if(writeSymbol("[","")){
-				compileExpression("before");
-				warning(writeSymbol("]","after"), "warn: missing ]");
-			} else if(writeSymbol("(", "")){
-				compileExpressionList("before");
-				warning(writeSymbol(")","after"), "warn: missing )");
-			} else if(writeSymbol(".", "after")){
-				warning(writeIdentifier("after"), "warn: missing varName");
-				if(writeSymbol("(", "")){
+		if(flag){
+
+		
+			if(flag == true && (idenFlag||leftFlag||unaryFlag)==false){
+				tokenizer.advance();
+			} else if(idenFlag){
+				if(writeSymbol("[","")){
+					compileExpression("before");
+					warning(writeSymbol("]","after"), "warn: missing ]");
+				} else if(writeSymbol("(", "")){
 					compileExpressionList("before");
 					warning(writeSymbol(")","after"), "warn: missing )");
+				} else if(writeSymbol(".", "after")){
+					warning(writeIdentifier("after"), "warn: missing varName");
+					if(writeSymbol("(", "")){
+						compileExpressionList("before");
+						warning(writeSymbol(")","after"), "warn: missing )");
+					}
 				}
+			} else if(leftFlag){
+				compileExpression("before");
+				warning(writeSymbol(")","after"), "warn: missing )");
+			} else if(unaryFlag){
+				tokenizer.advance();
+				compileTerm();
 			}
-		} else if(leftFlag){
-			compileExpression("before");
-			warning(writeSymbol(")","after"), "warn: missing )");
-		} else if(unaryFlag){
-			tokenizer.advance();
-			compileTerm();
-		}
 		
+		}
 		tabCounter = tmp;
 		writeTag("/term");
 		return true;
@@ -360,13 +361,14 @@ public class CompilationEngine {
 		if(advancePoint.matches("before")){
 			tokenizer.advance();
 		}
-		
-		compileExpression("");
-		
-		while(writeSymbol(",", "after")){
+		if(!tokenizer.symbol().equals(")")){
+	
 			compileExpression("");
-		}		
 		
+			while(writeSymbol(",", "after")){
+				compileExpression("");
+			}		
+		}
 		tabCounter = tmp;
 		writeTag("/expressionList");
 		
@@ -430,7 +432,6 @@ public class CompilationEngine {
 		boolean flag 
 		= tokenizer.symbol().matches("^(\\+|-|\\*|/|&amp;|\\||&lt;|&gt;|=)$");
 		if(flag){
-			System.out.println(tokenizer.symbol());
 			warning(writeSymbol(tokenizer.symbol(), ""), "warn: missing op");
 			tokenizer.advance();
 		}
