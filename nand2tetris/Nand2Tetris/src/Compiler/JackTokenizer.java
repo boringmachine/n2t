@@ -45,18 +45,11 @@ public class JackTokenizer {
 		reader = new InputStreamReader(in);
 		char[] data = new char[(int) file.length()];
 		reader.read(data);
-		this.data = (new String(data))
-				.replaceAll("(?://.*)|(/\\*(?:.|[\\n\\r])*?\\*/)", "")
-				.replaceAll("\n|\r|\n\r|\r\n", "")
-				.replaceAll(
-						"(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~|\\[|\\])",
-						" $1 ").replaceAll(" +", " ")
-				.replaceAll("&","&amp;")
-				.replaceAll("<", "&lt;")
-				.replaceAll(">", "&gt;");
-		reader = new InputStreamReader(new ByteArrayInputStream(
-				this.data.getBytes("UTF-8")));
-		//System.out.println(this.data);
+		this.data = (new String(data)).replaceAll("(?://.*)|(/\\*(?:.|[\\n\\r])*?\\*/)", "").replaceAll("\n|\r|\n\r|\r\n", "")
+				.replaceAll("(\\{|\\}|\\(|\\)|;|\\.|\\,|\\+|-|\\*|/|&|\\||<|>|=|~|\\[|\\])", " $1 ").replaceAll(" +", " ")
+				.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+		reader = new InputStreamReader(new ByteArrayInputStream(this.data.getBytes("UTF-8")));
+		// System.out.println(this.data);
 		scan = new Scanner(this.data);
 	}
 
@@ -79,8 +72,8 @@ public class JackTokenizer {
 			} else if (str.matches("[0-9]+")) {
 				integerConstant = str;
 			} else if (str.matches("^\".*\"?$")) {
-				while(!str.endsWith("\"")){
-					str = str+scan.next();
+				while (!str.endsWith("\"")) {
+					str = str + scan.next();
 				}
 				str = str.replaceAll("\"", "");
 				stringConstant = str;

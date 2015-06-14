@@ -9,29 +9,30 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Parser {
-	static ArithmeticType arismeticType(String command){
+	static ArithmeticType arismeticType(String command) {
 		if (command.equals("add")) {
 			return ArithmeticType.ADD;
-		} else if(command.equals("sub")){
+		} else if (command.equals("sub")) {
 			return ArithmeticType.SUB;
-		} else if(command.equals("neg")){
+		} else if (command.equals("neg")) {
 			return ArithmeticType.NEG;
-		} else if(command.equals("eq")){
+		} else if (command.equals("eq")) {
 			return ArithmeticType.EQ;
-		} else if(command.equals("gt")){
+		} else if (command.equals("gt")) {
 			return ArithmeticType.GT;
-		} else if(command.equals("lt")){
+		} else if (command.equals("lt")) {
 			return ArithmeticType.LT;
-		} else if(command.equals("and")){
+		} else if (command.equals("and")) {
 			return ArithmeticType.AND;
-		} else if(command.equals("or")){
+		} else if (command.equals("or")) {
 			return ArithmeticType.OR;
-		} else if(command.equals("not")){
+		} else if (command.equals("not")) {
 			return ArithmeticType.NOT;
 		} else {
 			return ArithmeticType.OTHER;
 		}
 	}
+
 	static CommandType commandType(String type) {
 		if (type.equals("push"))
 			return CommandType.C_PUSH;
@@ -49,11 +50,12 @@ public class Parser {
 			return CommandType.C_RETURN;
 		else if (type.equals("call"))
 			return CommandType.C_CALL;
-		else if(type.matches("add|sub|neg|eq|gt|lt|not|and|or"))
+		else if (type.matches("add|sub|neg|eq|gt|lt|not|and|or"))
 			return CommandType.C_ARITHMETIC;
 		else
 			return CommandType.C_OTHER;
 	}
+
 	// debug
 	public static void main(String args[]) throws IOException {
 		Parser a = new Parser("SimpleAdd.vm");
@@ -69,27 +71,29 @@ public class Parser {
 			System.out.println();
 		}
 	}
-	static SegmentType segmentType(String segment){
-		if(segment.equals("argument")){
+
+	static SegmentType segmentType(String segment) {
+		if (segment.equals("argument")) {
 			return SegmentType.ARGUMENT;
-		} else if(segment.equals("local")){
+		} else if (segment.equals("local")) {
 			return SegmentType.LOCAL;
-		} else if(segment.equals("static")){
+		} else if (segment.equals("static")) {
 			return SegmentType.STATIC;
-		} else if(segment.equals("constant")){
+		} else if (segment.equals("constant")) {
 			return SegmentType.CONSTANT;
-		} else if(segment.equals("this")){
+		} else if (segment.equals("this")) {
 			return SegmentType.THIS;
-		} else if(segment.equals("that")){
+		} else if (segment.equals("that")) {
 			return SegmentType.THAT;
-		} else if(segment.equals("pointer")){
+		} else if (segment.equals("pointer")) {
 			return SegmentType.POINTER;
-		} else if(segment.equals("temp")){
+		} else if (segment.equals("temp")) {
 			return SegmentType.TEMP;
-		} else{
+		} else {
 			return SegmentType.OTHER;
 		}
 	}
+
 	private String arg1;
 	private String arg2;
 	String command;
@@ -103,26 +107,23 @@ public class Parser {
 	private Scanner scan;
 
 	String type;
-	
+
 	Parser(String filename) throws IOException {
 		this.file = new File(filename);
 		in = new FileInputStream(file);
 		reader = new InputStreamReader(in);
 		char[] data = new char[(int) file.length()];
 		reader.read(data);
-		this.data = new StringBuilder().append((new String(data)).replaceAll(
-				"//.*\n?", ""));
-		reader = new InputStreamReader(new ByteArrayInputStream(this.data
-				.toString().getBytes(("UTF-8"))));
+		this.data = new StringBuilder().append((new String(data)).replaceAll("//.*\n?", ""));
+		reader = new InputStreamReader(new ByteArrayInputStream(this.data.toString().getBytes(("UTF-8"))));
 		scan = new Scanner(this.data.toString());
 	}
-	
+
 	void advance() {
 		arg1 = "";
 		arg2 = "";
 		try {
-			while ((command = scan.nextLine())
-					.matches("\\r|\\r\\n||\\n||\\n\\r"))
+			while ((command = scan.nextLine()).matches("\\r|\\r\\n||\\n||\\n\\r"))
 				;
 			String[] cmds = command.split(" ");
 			type = cmds[0].toLowerCase().replaceAll("\\p{Space}+", "");

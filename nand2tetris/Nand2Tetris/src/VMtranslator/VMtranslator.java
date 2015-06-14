@@ -19,17 +19,12 @@ public class VMtranslator {
 		String filePath = args[0];
 		boolean fileIsDir = false;
 		if (file.isDirectory()) {
-			OutputStreamWriter writer = new OutputStreamWriter(
-					new FileOutputStream(new File(filePath + ".vm")));
+			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(filePath + ".vm")));
 			StringBuilder asm = new StringBuilder();
 			String files[] = listFiles(file);
 			for (String fileStr : files) {
 				if (fileStr.endsWith(".vm")) {
-					asm.append("#"
-							+ fileStr
-							+ "\n"
-							+ new Parser(args[0] + "/" + fileStr).data
-									.toString() + "\n");
+					asm.append("#" + fileStr + "\n" + new Parser(args[0] + "/" + fileStr).data.toString() + "\n");
 				}
 			}
 			writer.write(asm.toString());
@@ -39,8 +34,7 @@ public class VMtranslator {
 		}
 
 		Parser parser = new Parser(filePath);
-		CodeWriter writer = new CodeWriter(filePath, filePath.replaceAll(
-				".vm$", ".asm"));
+		CodeWriter writer = new CodeWriter(filePath, filePath.replaceAll(".vm$", ".asm"));
 		if (fileIsDir) {
 			writer.writeInit();
 		}
@@ -66,8 +60,7 @@ public class VMtranslator {
 				writer.writeLabel(parser.arg1());
 				break;
 			case C_FUNCTION:
-				writer.writeFunction(parser.arg1(),
-						Integer.parseInt(parser.arg2()));
+				writer.writeFunction(parser.arg1(), Integer.parseInt(parser.arg2()));
 				break;
 			case C_CALL:
 				writer.writeCall(parser.arg1(), Integer.parseInt(parser.arg2()));
@@ -76,12 +69,10 @@ public class VMtranslator {
 				writer.writeReturn();
 				break;
 			case C_PUSH:
-				writer.writePushPop(parser.type, parser.arg1(),
-						Integer.parseInt(parser.arg2()));
+				writer.writePushPop(parser.type, parser.arg1(), Integer.parseInt(parser.arg2()));
 				break;
 			case C_POP:
-				writer.writePushPop(parser.type, parser.arg1(),
-						Integer.parseInt(parser.arg2()));
+				writer.writePushPop(parser.type, parser.arg1(), Integer.parseInt(parser.arg2()));
 				break;
 			default:
 				break;

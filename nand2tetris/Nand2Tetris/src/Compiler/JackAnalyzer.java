@@ -10,23 +10,23 @@ public class JackAnalyzer {
 		}
 		return files.toString().split(":");
 	}
-	
-	public static void main(String[] argv) throws Exception{
+
+	public static void main(String[] argv) throws Exception {
 		File file = new File(argv[0]);
 		String infile = argv[0];
-		if(file.isFile()){
+		if (file.isFile()) {
 			String outfile = argv[0].replaceAll("^(.*)\\.jack$", "$1.xml");
 			new CompilationEngine(infile, outfile);
-		} else if(file.isDirectory()){
+		} else if (file.isDirectory()) {
 			String[] files = listFiles(file);
-			for(String inFile: files){
-				if(inFile.endsWith("jack")){
-					inFile = file.toString()+"/"+inFile; 
+			for (String inFile : files) {
+				if (inFile.endsWith("jack")) {
+					inFile = file.toString() + "/" + inFile;
 					String outfile = inFile.replaceAll("^(.*)\\.jack$", "$1.xml");
 					new CompilationEngine(inFile, outfile);
 				}
 			}
 		}
 	}
-	
+
 }

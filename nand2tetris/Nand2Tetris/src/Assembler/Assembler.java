@@ -15,6 +15,7 @@ public class Assembler {
 		asm.writeCode();
 
 	}
+
 	private int counter = 0;
 	private ByteBuffer data;
 	private File file;
@@ -38,17 +39,13 @@ public class Assembler {
 	}
 
 	byte[] aCommand(String symbol) {
-		byte[] bytes = ByteBuffer.allocate(4)
-				.putInt(0x7FFF & table.getAddress(symbol)).array();
+		byte[] bytes = ByteBuffer.allocate(4).putInt(0x7FFF & table.getAddress(symbol)).array();
 		byte[] code = { bytes[2], bytes[3] };
 		return code;
 	}
 
 	byte[] cCommand(String dest, String comp, String jump) {
-		byte[] bytes = ByteBuffer
-				.allocate(4)
-				.putInt(0xE000 | Code.dest(dest) | Code.comp(comp)
-						| Code.jump(jump)).array();
+		byte[] bytes = ByteBuffer.allocate(4).putInt(0xE000 | Code.dest(dest) | Code.comp(comp) | Code.jump(jump)).array();
 		byte[] code = { bytes[2], bytes[3] };
 		return code;
 	}
@@ -57,10 +54,10 @@ public class Assembler {
 		parser = new Parser(infile);
 		ArrayList<String> defaultCommandList = new ArrayList<String>();
 		defaultCommandList.addAll(new SymbolTable().keySet());
-		while (parser.hasMoreCommands()){
+		while (parser.hasMoreCommands()) {
 			int address = 0;
 			parser.advance();
-			if(parser.commandType() == Parser.L_COMMAND){
+			if (parser.commandType() == Parser.L_COMMAND) {
 				address = counter;
 				table.addEntry(parser.symbol(), address);
 				defaultCommandList.add(parser.symbol());
@@ -76,13 +73,13 @@ public class Assembler {
 				address = Integer.parseInt(parser.symbol());
 			} else if (parser.commandType() == Parser.L_COMMAND) {
 			} else {
-				if (!table.contains(parser.symbol())){
+				if (!table.contains(parser.symbol())) {
 					address = finalAddress;
 				}
 			}
-			//TODO
+			// TODO
 			if (parser.commandType() == Parser.A_COMMAND) {
-				if(!defaultCommandList.contains(parser.symbol())){
+				if (!defaultCommandList.contains(parser.symbol())) {
 					table.addEntry(parser.symbol(), address);
 					finalAddress++;
 				}

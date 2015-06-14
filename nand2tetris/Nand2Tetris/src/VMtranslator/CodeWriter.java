@@ -56,7 +56,7 @@ public class CodeWriter {
 		asm("A=A-1");
 		asm("M=D");
 	}
-	
+
 	void pushReg() throws IOException {
 		asm("@LCL");
 		asm("D=M");
@@ -72,7 +72,7 @@ public class CodeWriter {
 		push();
 	}
 
-	void pushReg(String reg, int index) throws IOException{
+	void pushReg(String reg, int index) throws IOException {
 		asm("@" + index);
 		asm("D=A");
 		asm("@" + reg);
@@ -85,8 +85,8 @@ public class CodeWriter {
 		this.thisFile = fileName;
 	}
 
-	private String setReg(String segment){
-		switch(Parser.segmentType(segment)){
+	private String setReg(String segment) {
+		switch (Parser.segmentType(segment)) {
 		case LOCAL:
 			return "LCL";
 		case ARGUMENT:
@@ -97,13 +97,13 @@ public class CodeWriter {
 			return "THAT";
 		default:
 			return "";
-			
+
 		}
 	}
 
 	void writeArithmetic(String command) throws Exception {
 		pop(true);
-		switch(Parser.arismeticType(command)){
+		switch (Parser.arismeticType(command)) {
 		case ADD:
 			pop(false);
 			asm("D=A+D");
@@ -122,7 +122,7 @@ public class CodeWriter {
 			pop(false);
 			asm("D=A-D");
 			asm("@TRUE" + labelCounter);
-			switch(Parser.arismeticType(command)){
+			switch (Parser.arismeticType(command)) {
 			case EQ:
 				asm("D;JEQ");
 				break;
@@ -205,7 +205,7 @@ public class CodeWriter {
 		asm("@INF_LOOP");
 		asm("0;JMP");
 	}
-	
+
 	void writeInit() throws IOException {
 		asm("@256");
 		asm("D=A");
@@ -219,16 +219,14 @@ public class CodeWriter {
 		asm("(" + label + ")");
 	}
 
-	void writePushPop(String command, String segment, int index)
-			throws IOException {
+	void writePushPop(String command, String segment, int index) throws IOException {
 		String reg = setReg(segment);
 		thisFile = thisFile.replaceAll(".*/", "");
-		int add = 0;		
-		
-		
-		switch(Parser.commandType(command)){
+		int add = 0;
+
+		switch (Parser.commandType(command)) {
 		case C_PUSH:
-			switch(Parser.segmentType(segment)){
+			switch (Parser.segmentType(segment)) {
 			case TEMP:
 				add = 5;
 				asm("@R" + (index + add));
@@ -262,7 +260,7 @@ public class CodeWriter {
 			}
 			break;
 		case C_POP:
-			switch(Parser.segmentType(segment)){
+			switch (Parser.segmentType(segment)) {
 			case STATIC:
 				asm("@" + thisFile + "." + index);
 				asm("D=A");
@@ -274,13 +272,13 @@ public class CodeWriter {
 				asm("M=D");
 				break;
 			case POINTER:
-				add=3;
+				add = 3;
 				pop(true);
 				asm("@" + (index + add));
 				asm("M=D");
 				break;
 			case TEMP:
-				add=5;
+				add = 5;
 				pop(true);
 				asm("@" + (index + add));
 				asm("M=D");

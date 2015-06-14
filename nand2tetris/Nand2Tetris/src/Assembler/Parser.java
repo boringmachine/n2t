@@ -13,6 +13,7 @@ public class Parser {
 	static final int A_COMMAND = 0x1;
 	static final int C_COMMAND = 0x2;
 	static final int L_COMMAND = 0x4;
+
 	// TODO check the output
 	public static void main(String args[]) throws IOException {
 		Parser a = new Parser("Max.asm");
@@ -28,6 +29,7 @@ public class Parser {
 			System.out.println();
 		}
 	}
+
 	private String command;
 	private String data;
 	private File file;
@@ -44,10 +46,8 @@ public class Parser {
 		reader = new InputStreamReader(in);
 		char[] data = new char[(int) file.length()];
 		reader.read(data);
-		this.data = (new String(data)).replaceAll(" ", "").replaceAll(
-				"//.*\n?", "");
-		reader = new InputStreamReader(new ByteArrayInputStream(
-				this.data.getBytes("UTF-8")));
+		this.data = (new String(data)).replaceAll(" ", "").replaceAll("//.*\n?", "");
+		reader = new InputStreamReader(new ByteArrayInputStream(this.data.getBytes("UTF-8")));
 		scan = new Scanner(this.data).useDelimiter("\\p{Space}+");
 	}
 
@@ -89,8 +89,7 @@ public class Parser {
 
 	String jump() {
 		if (commandType() == C_COMMAND) {
-			return command.replaceAll(".*;$?", "").replaceAll(".*(D|M|A|1)$",
-					"");
+			return command.replaceAll(".*;$?", "").replaceAll(".*(D|M|A|1)$", "");
 		}
 		return "";
 	}
