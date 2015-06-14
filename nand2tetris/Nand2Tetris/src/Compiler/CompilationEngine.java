@@ -10,9 +10,8 @@ import java.io.OutputStreamWriter;
 public class CompilationEngine {
 
 	public static void main(String[] argv) throws Exception {
-		//CompilationEngine c = new CompilationEngine(argv[0], argv[1]);
-		CompilationEngine c = new CompilationEngine("sample/10/ArrayTest/Main.jack",
-				"sample/10/ArrayTest/Main.xml");
+		CompilationEngine c = new CompilationEngine(argv[0], argv[1]);
+		//CompilationEngine c = new CompilationEngine("sample/10/ArrayTest/Main.jack","sample/10/ArrayTest/Main.xml");
 
 	}
 
