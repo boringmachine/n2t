@@ -276,6 +276,7 @@ public class CompilationEngine {
 			
 			warning(writeKeyword(KeyWord.RETURN,  "after"), "warn: missing return");
 
+			System.out.println(tokenizer.symbol());
 			if(!writeSymbol(";", "")){
 				compileExpression("");
 				warning(writeSymbol(";",  ""), "warn: missing ;");
@@ -545,6 +546,18 @@ public class CompilationEngine {
 				break;
 			case RETURN:
 				s = "return";
+				break;
+			case THIS:
+				s = "this";
+				break;
+			case TRUE:
+				s = "true";
+				break;
+			case NULL:
+				s = "null";
+				break;
+			case FALSE:
+				s = "false";
 				break;
 			}
 			write("<keyword>"+s+"</keyword>");
